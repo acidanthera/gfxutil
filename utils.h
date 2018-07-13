@@ -199,5 +199,5 @@ int IsHexDigit (unsigned char *Digit, char Char);
 void CatPrintf(char *target, const char *format, ...);
 
 
-void *MallocCopy(unsigned int size, void *buf);
+void *MallocCopy(unsigned int newSize, unsigned int size, void *buf);
 #endif

@@ -63,7 +63,7 @@ unsigned char *str2uni(const char *str, int len)
 	if (!bout) 
 	{
 		fprintf(stderr, "str2unicode: out of memory\n");
-		return 0;
+		return NULL;
 	}
 	
 	/* Write out the contents of the string */
@@ -348,7 +348,7 @@ GFX_HEADER *parse_binary(unsigned char * bp, SETTINGS settings)
 	GFX_ENTRY *gfx_entry = (GFX_ENTRY *) NULL; 
 	GFX_ENTRY *gfx_entry_head = (GFX_ENTRY *) NULL;
 	GFX_ENTRY *gfx_entry_end  = (GFX_ENTRY *) NULL;
-	unsigned char *data, *bin, *tmp, *dpathtmp;
+	unsigned char *data = NULL, *bin = NULL, *tmp = NULL, *dpathtmp = NULL;
 	char * str;
 	unsigned int str_len, data_len, size, length;	
 	int i,j;
@@ -380,7 +380,8 @@ GFX_HEADER *parse_binary(unsigned char * bp, SETTINGS settings)
 		if(!gfx_blockheader)
 		{
 			fprintf(stderr, "parse_binary: out of memory\n");
-			return NULL;	
+			free(gfx_header);
+			return NULL;
 		}
 		//read block data
 		gfx_blockheader->blocksize = READ_UINT32(bp);
@@ -401,6 +402,7 @@ GFX_HEADER *parse_binary(unsigned char * bp, SETTINGS settings)
 			{
 				// BugBug: Code to catch bogus device path
 				fprintf(stderr, "parse_binary: Cannot find device path end! Probably a bogus device path.\n");
+				free(gfx_header);
 				return NULL;
 			}				
 			if( READ_UINT32(tmp) == 0x0004ff7f || READ_UINT32(tmp) == 0x0004ffff )
@@ -426,18 +428,28 @@ GFX_HEADER *parse_binary(unsigned char * bp, SETTINGS settings)
 			{
 				if(!uni2str(bin, length, &str, &str_len))
 				{
+					free(bin);
+					free(gfx_header);
+					free(gfx_blockheader);
 					return NULL;
 				}
 			}
 			else
 			{
+				free(bin);
+				free(gfx_header);
+				free(gfx_blockheader);
 				return NULL;
 			}
 			
 			data_len = READ_UINT32(bp);
 			data_len -= 4; bp += 4; size -=4;
 			if(!readbin(&bp, &size, &data, data_len))
-			{				
+			{
+				free(data);
+				free(bin);
+				free(gfx_header);
+				free(gfx_blockheader);
 				return NULL;
 			}	
 			
@@ -445,7 +457,11 @@ GFX_HEADER *parse_binary(unsigned char * bp, SETTINGS settings)
 			if(!gfx_entry)
 			{
 				fprintf(stderr, "parse_binary: out of memory\n");
-				return NULL;	
+				free(data);
+				free(bin);
+				free(gfx_header);
+				free(gfx_blockheader);
+				return NULL;
 			}
 			//read entries
 			gfx_entry->bkey = bin;
@@ -908,10 +924,14 @@ int WritePropertyList(CFPropertyListRef propertyList, CFURLRef fileURL)
 	{
 		stream = CFWriteStreamCreateWithFile(kCFAllocatorDefault, fileURL);
 	
-		if(CFWriteStreamOpen(stream))
+		if (stream)
 		{
-			ret = CFPropertyListWrite(propertyList, stream, kCFPropertyListXMLFormat_v1_0, 0, NULL);
-			CFWriteStreamClose(stream);
+			if(CFWriteStreamOpen(stream))
+			{
+				ret = CFPropertyListWrite(propertyList, stream, kCFPropertyListXMLFormat_v1_0, 0, NULL);
+				CFWriteStreamClose(stream);
+			}
+
 			CFRelease(stream);
 		}
 	}	
@@ -1259,12 +1279,15 @@ char *file_get_contents(FILE *fp)
 	buf[0]='\0';
 	while(fgets(line, BUFSIZ, fp) != NULL)
 	{
-		buf = realloc(buf,strlen(buf) + strlen(line) + 1);
-		if(!buf)
+		char *nbuf = realloc(buf,strlen(buf) + strlen(line) + 1);
+		if(!nbuf)
 		{
 			fprintf(stderr, "file_get_contents: out of memory\n");
+			free(buf);
 			return NULL;
 		}
+
+		buf = nbuf;
 
 		strcat(buf,line);	
 	}
@@ -1397,6 +1420,7 @@ int main (int argc, char * argv[])
 			if(!plist)
 			{
 				fprintf(stderr, "%s: invalid property list xml inputfile '%s'!\n",argv[0],settings.ifile);
+				if (fileURL) CFRelease(fileURL);
 				exit(1);		
 			}
 			

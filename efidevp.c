@@ -56,7 +56,7 @@ char *GetParamByNodeName (CHAR8 *Str, CHAR8 *NodeName)
 		return NULL;
 	}
 
-	ParamStr = MallocCopy ((ParameterLength + 1), ParamStr);
+	ParamStr = MallocCopy ((ParameterLength + 1), (ParameterLength + 1), ParamStr);
 	if (ParamStr == NULL) 
 	{
 		return NULL;
@@ -326,7 +326,7 @@ EFI_DEVICE_PATH *DuplicateDevicePath (EFI_DEVICE_PATH *DevicePath)
   }
 
   // Allocate space for duplicate device path
-  NewDevicePath = MallocCopy(Size, DevicePath);
+  NewDevicePath = MallocCopy(Size, Size, DevicePath);
 
   return NewDevicePath;
 }
@@ -359,7 +359,7 @@ EFI_DEVICE_PATH *AppendDevicePath (EFI_DEVICE_PATH *Src1, EFI_DEVICE_PATH *Src2)
   Size2         = DevicePathSize (Src2);
   Size          = Size1 + Size2 - sizeof (EFI_DEVICE_PATH);
 
-  NewDevicePath = MallocCopy(Size, Src1);
+  NewDevicePath = MallocCopy(Size, Size1, Src1);
 
   if (NewDevicePath != NULL) 
   {
@@ -383,7 +383,7 @@ EFI_DEVICE_PATH *AppendDevicePathNode (EFI_DEVICE_PATH  *Src1, EFI_DEVICE_PATH  
   // Build a Node that has a terminator on it
   NodeLength  = DevicePathNodeLength (Node);
 
-  Temp = MallocCopy(NodeLength + sizeof (EFI_DEVICE_PATH), Node);
+  Temp = MallocCopy(NodeLength + sizeof (EFI_DEVICE_PATH), NodeLength, Node);
   if (Temp == NULL) 
   {
     return NULL;
@@ -410,7 +410,7 @@ EFI_DEVICE_PATH *InsertDevicePathNode (EFI_DEVICE_PATH  *Src1, EFI_DEVICE_PATH  
   // Build a Node that has a terminator on it
   NodeLength  = DevicePathNodeLength (Node);
 
-  Temp = MallocCopy(NodeLength + sizeof (EFI_DEVICE_PATH), Node);
+  Temp = MallocCopy(NodeLength + sizeof (EFI_DEVICE_PATH), NodeLength, Node);
   if (Temp == NULL) 
   {
     return NULL;
@@ -686,6 +686,7 @@ EFI_DEVICE_PATH *ConvertTextToDevicePath (const CHAR8 *TextDevicePath)
     if (DumpNode == NULL) 
 	{
 		fprintf(stderr, "Unknown device node '%s'! Check syntax!\n",DeviceNodeStr);
+		free(DevicePath);
 		return NULL;
     } 
 	else 

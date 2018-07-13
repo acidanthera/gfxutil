@@ -496,6 +496,7 @@ int StrToBuf (unsigned char *Buf, unsigned int BufferLength, char *Str)
   for(Index = 0; Index < StrLength; Index++, Str++) 
   {
 
+    Digit = 0;
     IsHexDigit (&Digit, *Str);
 
     // For odd charaters, write the upper nibble for each buffer byte,
@@ -609,11 +610,11 @@ void CatPrintf(char *target, const char *format, ...)
 	va_end(varargs);
 }
 
-void *MallocCopy(unsigned int size, void *buf)
+void *MallocCopy(unsigned int newSize, unsigned int size, void *buf)
 {
 	void *new = NULL;
 	
-	if( (new = (void *)malloc(size * sizeof(void) ) ) != NULL)
+	if( (new = (void *)calloc(newSize, sizeof(unsigned char)) ) != NULL)
 	{
 		memcpy(new, buf, size);
 	}
