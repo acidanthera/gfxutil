@@ -23,7 +23,7 @@ char *GetParamByNodeName (CHAR8 *Str, CHAR8 *NodeName)
 	UINT32 ParameterLength;
 
 	// Check whether the node name matchs
-	NodeNameLength = strlen (NodeName);
+	NodeNameLength = (UINT32)strlen (NodeName);
 	if (strncasecmp(Str, NodeName, NodeNameLength) != 0) 
 	{
 		return NULL;
@@ -750,7 +750,7 @@ CHAR8 *ConvertDeviceNodeToText (const EFI_DEVICE_PATH *DeviceNode, BOOLEAN Displ
 	DumpNode (Str, (void *) DeviceNode, DisplayOnly, AllowShortcuts);
 
 	// Shrink pool used for string allocation
-	NewSize = (strlen(Str) + 1);
+	NewSize = (UINT32)(strlen(Str) + 1);
 	Str = realloc(Str, NewSize);
 	assert(Str != NULL);
 	Str[strlen(Str)] = 0;
@@ -816,7 +816,7 @@ CHAR8 *ConvertDevicePathToText (const EFI_DEVICE_PATH *DevicePath, BOOLEAN Displ
 	
 	// Shrink pool used for string allocation
 	free(UnpackDevPath);
-	NewSize = (strlen(Str) + 1);
+	NewSize = (UINT32)(strlen(Str) + 1);
 	Str = realloc(Str, NewSize);
 	assert(Str != NULL);
 	Str[strlen(Str)] = 0;
@@ -844,7 +844,7 @@ io_iterator_t RecursiveFindDevicePath(io_iterator_t iterator, const io_string_t 
 	
 	while((entry = IOIteratorNext(iterator)) != 0)
 	{
-		status == IORegistryEntryGetNameInPlane(entry, plane, name);
+		status = IORegistryEntryGetNameInPlane(entry, plane, name);
 		assertion(status == KERN_SUCCESS, "can't obtain registry entry name");
 		
 		size = sizeof(prop_name);
@@ -912,7 +912,7 @@ io_iterator_t RecursiveFindDevicePath(io_iterator_t iterator, const io_string_t 
 				else if(IOObjectConformsTo(previous,"IOPCIDevice")) //PCI node
 				{
 					location = (CHAR8 *)malloc(sizeof(io_string_t));
-					status == IORegistryEntryGetLocationInPlane(previous, plane, location);
+					status = IORegistryEntryGetLocationInPlane(previous, plane, location);
 					assertion(status == KERN_SUCCESS, "can't obtain IOPCIDevice location");
 
 					DeviceStr   = GetNextParamStr (&location);

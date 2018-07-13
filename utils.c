@@ -402,7 +402,7 @@ unsigned int Dtoi (char *str)
   {
     if (c >= '0' && c <= '9') 
 	{
-      if (u > m || u == m && c - '0' > (int) n) 
+		if (u > m || (u == m && c - '0' > (int) n))
 	  {
         return (unsigned int) -1;
       }

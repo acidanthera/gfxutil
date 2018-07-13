@@ -412,7 +412,7 @@ GFX_HEADER *parse_binary(unsigned char * bp, SETTINGS settings)
 		}
 		
 		// read device path data
-		gfx_blockheader->devpath_len = abs(tmp-bp);
+		gfx_blockheader->devpath_len = (unsigned int)abs((int)(tmp-bp));
 		readbin(&bp, &size, &dpathtmp,gfx_blockheader->devpath_len);		
 		gfx_blockheader->devpath = (EFI_DEVICE_PATH *)dpathtmp;		
 		
@@ -538,7 +538,7 @@ CFDictionaryRef CreateGFXDictionary(GFX_HEADER * gfx)
 				break;
 				case DATA_INT8:
 					bigint = READ_UINT8(gfx_entry_tmp->val);
-					sprintf(hexstr,"0x%02x",bigint);
+					sprintf(hexstr,"0x%02llx",bigint);
 					string = CFStringCreateWithCString(kCFAllocatorDefault,hexstr, kCFStringEncodingASCII);
 					CFDictionarySetValue(items, key, string);
 					CFRelease(string);
@@ -546,7 +546,7 @@ CFDictionaryRef CreateGFXDictionary(GFX_HEADER * gfx)
 				break;
 				case DATA_INT16:
 					bigint = READ_UINT16(gfx_entry_tmp->val);
-					sprintf(hexstr,"0x%04x",bigint);
+					sprintf(hexstr,"0x%04llx",bigint);
 					string = CFStringCreateWithCString(kCFAllocatorDefault,hexstr, kCFStringEncodingASCII);
 					CFDictionarySetValue(items, key, string);
 					CFRelease(string);
@@ -554,7 +554,7 @@ CFDictionaryRef CreateGFXDictionary(GFX_HEADER * gfx)
 				break;
 				case DATA_INT32:
 					bigint = READ_UINT32(gfx_entry_tmp->val);
-					sprintf(hexstr,"0x%08x",bigint);
+					sprintf(hexstr,"0x%08llx",bigint);
 					string = CFStringCreateWithCString(kCFAllocatorDefault,hexstr, kCFStringEncodingASCII);
 					CFDictionarySetValue(items, key, string);
 					CFRelease(string);
@@ -620,7 +620,7 @@ GFX_HEADER *CreateGFXFromPlist(CFPropertyListRef plist)
 	CFIndex needed;	
 	uint64_t bigint;
 	
-	num_blocks = CFDictionaryGetCount(plist);
+	num_blocks = (int)CFDictionaryGetCount(plist);
 	if(!num_blocks)
 	{
 		printf("CreateGFXFromPlist: no dictionaries found in property list\n");
@@ -651,7 +651,7 @@ GFX_HEADER *CreateGFXFromPlist(CFPropertyListRef plist)
 	for(i=0; i<num_blocks;i++)
 	{
 		this_block = (CFMutableDictionaryRef) CFDictionaryGetValue(plist,dict_keys[i]);		
-		num_rec = CFDictionaryGetCount(this_block);
+		num_rec = (int)CFDictionaryGetCount(this_block);
 		
 		if(!num_rec)
 		{
@@ -686,7 +686,7 @@ GFX_HEADER *CreateGFXFromPlist(CFPropertyListRef plist)
 		// add at end string terminator
 		bytes[needed] = '\0';		
 		// is hex or text notation 		
-		if(isHexString(bytes,(needed-1)))
+		if(isHexString(bytes,(unsigned int)(needed-1)))
 		{	
 			// hexadecimal devicepath
 			gfx_blockheader->devpath = (EFI_DEVICE_PATH *)hex2bin((char *)bytes, &len);
@@ -731,10 +731,10 @@ GFX_HEADER *CreateGFXFromPlist(CFPropertyListRef plist)
 			}			
 			
 			gfx_entry->key = (char *)bytes;
-			gfx_entry->key_len = needed;	
+			gfx_entry->key_len = (unsigned int)needed;
 			
-			gfx_entry->bkey = str2uni((char *)bytes, needed);
-			gfx_entry->bkey_len = unilen((char *)bytes, needed);
+			gfx_entry->bkey = str2uni((char *)bytes, (int)needed);
+			gfx_entry->bkey_len = unilen((char *)bytes, (int)needed);
 			
 			block_size+=4; // key len
 			block_size+=gfx_entry->bkey_len;			
@@ -777,7 +777,7 @@ GFX_HEADER *CreateGFXFromPlist(CFPropertyListRef plist)
 				
 							WRITE_UINT8(data, bigint);
 							gfx_entry->val = data;
-							gfx_entry->val_len = needed;
+							gfx_entry->val_len = (unsigned int)needed;
 							gfx_entry->val_type = DATA_INT8;							
 						break;
 						case 4:
@@ -791,7 +791,7 @@ GFX_HEADER *CreateGFXFromPlist(CFPropertyListRef plist)
 				
 							WRITE_UINT16(data, bigint);
 							gfx_entry->val = data;
-							gfx_entry->val_len = needed;
+							gfx_entry->val_len = (unsigned int)needed;
 							gfx_entry->val_type = DATA_INT16;						
 						break;
 						case 8:
@@ -805,7 +805,7 @@ GFX_HEADER *CreateGFXFromPlist(CFPropertyListRef plist)
 				
 							WRITE_UINT32(data, bigint);
 							gfx_entry->val = data;
-							gfx_entry->val_len = needed;
+							gfx_entry->val_len = (unsigned int)needed;
 							gfx_entry->val_type = DATA_INT32;												
 						break;
 						default:
@@ -817,7 +817,7 @@ GFX_HEADER *CreateGFXFromPlist(CFPropertyListRef plist)
 				else
 				{
 					gfx_entry->val = bytes;
-					gfx_entry->val_len = needed-1; // exclude string terminator
+					gfx_entry->val_len = (unsigned int)(needed-1); // exclude string terminator
 					gfx_entry->val_type = DATA_STRING;
 				}			
 			}
@@ -834,7 +834,7 @@ GFX_HEADER *CreateGFXFromPlist(CFPropertyListRef plist)
 				CFNumberGetValue(block_vals[num_rec], kCFNumberSInt64Type, &bigint);
 				WRITE_UINT32(bytes, bigint);
 				gfx_entry->val = bytes;
-				gfx_entry->val_len = needed;
+				gfx_entry->val_len = (unsigned int)needed;
 				gfx_entry->val_type = DATA_INT32; //only known number type from plist										
 			}
 			else if(CFGetTypeID(block_vals[num_rec]) == CFBooleanGetTypeID())
@@ -849,7 +849,7 @@ GFX_HEADER *CreateGFXFromPlist(CFPropertyListRef plist)
 				bigint = CFBooleanGetValue(block_vals[num_rec]);
 				WRITE_UINT8(bytes, bigint);
 				gfx_entry->val = bytes;
-				gfx_entry->val_len = needed;
+				gfx_entry->val_len = (unsigned int)needed;
 				gfx_entry->val_type = DATA_INT8;									
 			}			
 			else // data type
@@ -863,7 +863,7 @@ GFX_HEADER *CreateGFXFromPlist(CFPropertyListRef plist)
 				}			
 				CFDataGetBytes(block_vals[num_rec], CFRangeMake(0,needed), bytes);
 				gfx_entry->val = bytes;
-				gfx_entry->val_len = needed;
+				gfx_entry->val_len = (unsigned int)needed;
 				gfx_entry->val_type = DATA_BINARY;						
 			}
 						
@@ -902,7 +902,6 @@ GFX_HEADER *CreateGFXFromPlist(CFPropertyListRef plist)
 int WritePropertyList(CFPropertyListRef propertyList, CFURLRef fileURL)
 {
 	CFWriteStreamRef stream;
-	CFStringRef errorString;
 	CFIndex ret = -1;
 	
 	if(propertyList && fileURL)
@@ -911,32 +910,38 @@ int WritePropertyList(CFPropertyListRef propertyList, CFURLRef fileURL)
 	
 		if(CFWriteStreamOpen(stream))
 		{
-			ret = CFPropertyListWriteToStream(propertyList, stream, kCFPropertyListXMLFormat_v1_0, &errorString);
+			ret = CFPropertyListWrite(propertyList, stream, kCFPropertyListXMLFormat_v1_0, 0, NULL);
 			CFWriteStreamClose(stream);
 			CFRelease(stream);
 		}
 	}	
-	return ret;
+	return (int)ret;
 }
 
 CFPropertyListRef ReadPropertyList(CFURLRef fileURL)
 {
 	CFReadStreamRef stream;
-	CFPropertyListRef plist;
-	CFStringRef errorString = NULL;
+	CFPropertyListRef plist = NULL;
+	CFErrorRef error = NULL;
 	CFPropertyListFormat format;
 		
 	stream = CFReadStreamCreateWithFile(kCFAllocatorDefault, fileURL);
 	
 	if(CFReadStreamOpen(stream))
 	{
-		plist = CFPropertyListCreateFromStream(kCFAllocatorDefault, stream, 0, kCFPropertyListImmutable, &format, &errorString); // 0 streamlength, read to EOF		
+		plist = CFPropertyListCreateWithStream(kCFAllocatorDefault, stream, 0, kCFPropertyListImmutable, &format, &error); // 0 streamlength, read to EOF
 		CFReadStreamClose(stream);
 		CFRelease(stream);	
 	}
-		
+
+	if(error)
+	{
+		CFRelease(error);
+		if (plist) CFRelease(plist);
+		return NULL;
+	}
+
 	if(plist == NULL) return NULL;
-	if(errorString) return NULL;
 	
 	if(CFDictionaryGetTypeID() != CFGetTypeID(plist)) return NULL;
 	if(!CFPropertyListIsValid(plist, kCFPropertyListXMLFormat_v1_0)) return NULL;
@@ -1058,7 +1063,7 @@ int parse_args(int argc, char * argv[], SETTINGS *settings)
 				// I only speak lower case.
 				for(i = 0;i<strlen(optarg);i++)
 				{
-					tolower(optarg[i]);
+					optarg[i] = tolower(optarg[i]);
 				}
 				
 				if(!strcmp(optarg,"hex"))
@@ -1089,7 +1094,7 @@ int parse_args(int argc, char * argv[], SETTINGS *settings)
 				// I only speak lower case.
 				for(i = 0;i<strlen(optarg);i++)
 				{
-					tolower(optarg[i]);
+					optarg[i] = tolower(optarg[i]);
 				}
 				
 				if(!strcmp(optarg,"hex"))
