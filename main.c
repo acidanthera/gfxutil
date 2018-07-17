@@ -29,7 +29,7 @@ static int unilen(const char *str, int len)
 {
 	unsigned long ch;
 	int posn = 0;
-	int nbytes = 0;
+	int nbytes = 2;
 	while(posn < len)
 	{
 		ch = UTF8ReadChar(str, len, &posn);
@@ -337,6 +337,32 @@ unsigned char *gfx2bin(GFX_HEADER *gfx)
 	return NULL;					
 }
 
+static void free_gfx_blockheader_list(GFX_BLOCKHEADER *head, GFX_BLOCKHEADER *end)
+{
+	GFX_BLOCKHEADER *tmp;
+
+	do {
+		if (head) {
+			tmp = head;
+			head = head->next;
+			free(tmp);
+		}
+	} while (head != end);
+}
+
+static void free_gfx_entry_list(GFX_ENTRY *head, GFX_ENTRY *end)
+{
+	GFX_ENTRY *tmp;
+
+	do {
+		if (head) {
+			tmp = head;
+			head = head->next;
+			free(tmp);
+		}
+	} while (head != end);
+}
+
 // this reads gfx binary info and parses it
 GFX_HEADER *parse_binary(unsigned char * bp, SETTINGS settings)
 {
@@ -349,7 +375,7 @@ GFX_HEADER *parse_binary(unsigned char * bp, SETTINGS settings)
 	GFX_ENTRY *gfx_entry_head = (GFX_ENTRY *) NULL;
 	GFX_ENTRY *gfx_entry_end  = (GFX_ENTRY *) NULL;
 	unsigned char *data = NULL, *bin = NULL, *tmp = NULL, *dpathtmp = NULL;
-	char * str;
+	char * str = NULL;
 	unsigned int str_len, data_len, size, length;	
 	int i,j;
 
@@ -380,6 +406,7 @@ GFX_HEADER *parse_binary(unsigned char * bp, SETTINGS settings)
 		if(!gfx_blockheader)
 		{
 			fprintf(stderr, "parse_binary: out of memory\n");
+			free_gfx_blockheader_list(gfx_blockheader_head, gfx_blockheader_end);
 			free(gfx_header);
 			return NULL;
 		}
@@ -402,6 +429,8 @@ GFX_HEADER *parse_binary(unsigned char * bp, SETTINGS settings)
 			{
 				// BugBug: Code to catch bogus device path
 				fprintf(stderr, "parse_binary: Cannot find device path end! Probably a bogus device path.\n");
+				free_gfx_blockheader_list(gfx_blockheader_head, gfx_blockheader_end);
+				free(gfx_blockheader);
 				free(gfx_header);
 				return NULL;
 			}				
@@ -415,7 +444,7 @@ GFX_HEADER *parse_binary(unsigned char * bp, SETTINGS settings)
 		
 		// read device path data
 		gfx_blockheader->devpath_len = (unsigned int)abs((int)(tmp-bp));
-		readbin(&bp, &size, &dpathtmp,gfx_blockheader->devpath_len);		
+		assert(readbin(&bp, &size, &dpathtmp,gfx_blockheader->devpath_len));
 		gfx_blockheader->devpath = (EFI_DEVICE_PATH *)dpathtmp;		
 		
 		gfx_entry_head = NULL;
@@ -429,16 +458,20 @@ GFX_HEADER *parse_binary(unsigned char * bp, SETTINGS settings)
 				if(!uni2str(bin, length, &str, &str_len))
 				{
 					free(bin);
-					free(gfx_header);
+					free_gfx_blockheader_list(gfx_blockheader_head, gfx_blockheader_end);
+					free_gfx_entry_list(gfx_entry_head, gfx_entry_end);
 					free(gfx_blockheader);
+					free(gfx_header);
 					return NULL;
 				}
 			}
 			else
 			{
 				free(bin);
-				free(gfx_header);
+				free_gfx_blockheader_list(gfx_blockheader_head, gfx_blockheader_end);
+				free_gfx_entry_list(gfx_entry_head, gfx_entry_end);
 				free(gfx_blockheader);
+				free(gfx_header);
 				return NULL;
 			}
 			
@@ -446,10 +479,13 @@ GFX_HEADER *parse_binary(unsigned char * bp, SETTINGS settings)
 			data_len -= 4; bp += 4; size -=4;
 			if(!readbin(&bp, &size, &data, data_len))
 			{
+				free(str);
 				free(data);
 				free(bin);
-				free(gfx_header);
+				free_gfx_blockheader_list(gfx_blockheader_head, gfx_blockheader_end);
+				free_gfx_entry_list(gfx_entry_head, gfx_entry_end);
 				free(gfx_blockheader);
+				free(gfx_header);
 				return NULL;
 			}	
 			
@@ -457,10 +493,13 @@ GFX_HEADER *parse_binary(unsigned char * bp, SETTINGS settings)
 			if(!gfx_entry)
 			{
 				fprintf(stderr, "parse_binary: out of memory\n");
+				free(str);
 				free(data);
 				free(bin);
-				free(gfx_header);
+				free_gfx_blockheader_list(gfx_blockheader_head, gfx_blockheader_end);
+				free_gfx_entry_list(gfx_entry_head, gfx_entry_end);
 				free(gfx_blockheader);
+				free(gfx_header);
 				return NULL;
 			}
 			//read entries
@@ -672,6 +711,8 @@ GFX_HEADER *CreateGFXFromPlist(CFPropertyListRef plist)
 		if(!num_rec)
 		{
 			printf("CreateGFXFromPlist: empty dictionary block found in property list\n");
+			free_gfx_blockheader_list(gfx_blockheader_head, gfx_blockheader_end);
+			free(gfx_header);
 			return NULL;			
 		}
 
@@ -691,12 +732,19 @@ GFX_HEADER *CreateGFXFromPlist(CFPropertyListRef plist)
 		if (!bytes) 
 		{
 			fprintf(stderr, "CreateGFXFromPlist: out of memory\n");
+			free(gfx_blockheader);
+			free_gfx_blockheader_list(gfx_blockheader_head, gfx_blockheader_end);
+			free(gfx_header);
 			return NULL;
 		}					
-		ret = CFStringGetBytes(dict_keys[i], CFRangeMake(0, count), kCFStringEncodingASCII, 0, false, bytes, count, &needed);
-		if(ret != count) // not ascii string
+		ret = CFStringGetBytes(dict_keys[i], CFRangeMake(0, count-1), kCFStringEncodingASCII, 0, false, bytes, count, &needed);
+		if(ret != count-1) // not ascii string
 		{
 			fprintf(stderr, "CreateGFXFromPlist: string conversion error occured, not ascii string!\n");
+			free(gfx_blockheader);
+			free_gfx_blockheader_list(gfx_blockheader_head, gfx_blockheader_end);
+			free(gfx_header);
+			free(bytes);
 			return NULL;					
 		}
 		// add at end string terminator
@@ -716,6 +764,10 @@ GFX_HEADER *CreateGFXFromPlist(CFPropertyListRef plist)
 			if(gfx_blockheader->devpath == NULL)
 			{
 				fprintf(stderr, "CreateGFXFromPlist: device path conversion error occured, not correct sytax!\n");
+				free(bytes);
+				free_gfx_blockheader_list(gfx_blockheader_head, gfx_blockheader_end);
+				free(gfx_header);
+				free(gfx_blockheader);
 				return NULL;								
 			}
 			gfx_blockheader->devpath_len = DevicePathSize (gfx_blockheader->devpath);
@@ -723,6 +775,7 @@ GFX_HEADER *CreateGFXFromPlist(CFPropertyListRef plist)
 		}
 		
 		free(key);
+		free(bytes);
 		
 		CFDictionaryGetKeysAndValues(this_block, (const void **)block_keys, (const void **)block_vals);
 		gfx_entry_head = NULL;
@@ -736,15 +789,24 @@ GFX_HEADER *CreateGFXFromPlist(CFPropertyListRef plist)
 			if (!bytes) 
 			{
 				fprintf(stderr, "CreateGFXFromPlist: out of memory\n");
+				free_gfx_blockheader_list(gfx_blockheader_head, gfx_blockheader_end);
+				free_gfx_entry_list(gfx_entry_head, gfx_entry_end);
+				free(gfx_entry);
 				return NULL;
 			}					
 			
-			ret = CFStringGetBytes(block_keys[num_rec], CFRangeMake(0, count), kCFStringEncodingASCII, 0, false, bytes, count, &needed);
-			if(ret != count) // not ascii string
+			ret = CFStringGetBytes(block_keys[num_rec], CFRangeMake(0, count-1), kCFStringEncodingASCII, 0, false, bytes, count, &needed);
+			if(ret != count-1) // not ascii string
 			{
 				fprintf(stderr, "CreateGFXFromPlist: string conversion error occured, not ascii string!\n");
-				return NULL;					
-			}			
+				free(bytes);
+				free_gfx_blockheader_list(gfx_blockheader_head, gfx_blockheader_end);
+				free_gfx_entry_list(gfx_entry_head, gfx_entry_end);
+				free(gfx_entry);
+				return NULL;
+			}
+			// add at end string terminator
+			bytes[needed] = '\0';
 			
 			gfx_entry->key = (char *)bytes;
 			gfx_entry->key_len = (unsigned int)needed;
@@ -763,14 +825,23 @@ GFX_HEADER *CreateGFXFromPlist(CFPropertyListRef plist)
 				if (!bytes) 
 				{
 					fprintf(stderr, "CreateGFXFromPlist: out of memory\n");
+					free_gfx_entry_list(gfx_entry_head, gfx_entry_end);
+					free(gfx_entry);
+					free(gfx_header);
+					free(gfx_blockheader);
 					return NULL;
 				}					
 				
-				ret = CFStringGetBytes(block_vals[num_rec], CFRangeMake(0, count), kCFStringEncodingASCII, 0, false, bytes, count, &needed);
-				if(ret != count) // not ascii string
+				ret = CFStringGetBytes(block_vals[num_rec], CFRangeMake(0, count-1), kCFStringEncodingASCII, 0, false, bytes, count, &needed);
+				if(ret != count-1) // not ascii string
 				{
 					fprintf(stderr, "CreateGFXFromPlist: string conversion error occured, not ascii string!\n");
-					return NULL;					
+					free(bytes);
+					free_gfx_entry_list(gfx_entry_head, gfx_entry_end);
+					free(gfx_entry);
+					free(gfx_header);
+					free(gfx_blockheader);
+					return NULL;
 				}				
 				// add at end string terminator
 				bytes[needed] = '\0';
@@ -844,6 +915,10 @@ GFX_HEADER *CreateGFXFromPlist(CFPropertyListRef plist)
 				if (!bytes) 
 				{
 					fprintf(stderr, "CreateGFXFromPlist: out of memory\n");
+					free_gfx_entry_list(gfx_entry_head, gfx_entry_end);
+					free(gfx_entry);
+					free(gfx_header);
+					free(gfx_blockheader);
 					return NULL;
 				}
 				
@@ -860,6 +935,10 @@ GFX_HEADER *CreateGFXFromPlist(CFPropertyListRef plist)
 				if (!bytes) 
 				{
 					fprintf(stderr, "CreateGFXFromPlist: out of memory\n");
+					free_gfx_entry_list(gfx_entry_head, gfx_entry_end);
+					free(gfx_entry);
+					free(gfx_header);
+					free(gfx_blockheader);
 					return NULL;
 				}
 				bigint = CFBooleanGetValue(block_vals[num_rec]);
@@ -875,6 +954,10 @@ GFX_HEADER *CreateGFXFromPlist(CFPropertyListRef plist)
 				if (!bytes) 
 				{
 					fprintf(stderr, "CreateGFXFromPlist: out of memory\n");
+					free_gfx_entry_list(gfx_entry_head, gfx_entry_end);
+					free(gfx_entry);
+					free(gfx_header);
+					free(gfx_blockheader);
 					return NULL;
 				}			
 				CFDataGetBytes(block_vals[num_rec], CFRangeMake(0,needed), bytes);
@@ -953,6 +1036,10 @@ CFPropertyListRef ReadPropertyList(CFURLRef fileURL)
 		CFReadStreamClose(stream);
 		CFRelease(stream);	
 	}
+	else
+	{
+		if (stream) CFRelease(stream);
+	}
 
 	if(error)
 	{
@@ -963,16 +1050,31 @@ CFPropertyListRef ReadPropertyList(CFURLRef fileURL)
 
 	if(plist == NULL) return NULL;
 	
-	if(CFDictionaryGetTypeID() != CFGetTypeID(plist)) return NULL;
-	if(!CFPropertyListIsValid(plist, kCFPropertyListXMLFormat_v1_0)) return NULL;
+	if(CFDictionaryGetTypeID() != CFGetTypeID(plist))
+	{
+		CFRelease(plist);
+		return NULL;
+	}
+	if(!CFPropertyListIsValid(plist, kCFPropertyListXMLFormat_v1_0))
+	{
+		CFRelease(plist);
+		return NULL;
+	}
 		
 	return plist;
 }
 
 CFURLRef URLCreate(const char *path)
 {
-	CFURLRef url = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, CFStringCreateWithCStringNoCopy(kCFAllocatorDefault, path, kCFStringEncodingASCII, kCFAllocatorNull), kCFURLPOSIXPathStyle, false);
-	return url;
+	CFStringRef cfpath = CFStringCreateWithCStringNoCopy(kCFAllocatorDefault, path, kCFStringEncodingASCII, kCFAllocatorNull);
+	if (cfpath)
+	{
+		CFURLRef url = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, cfpath, kCFURLPOSIXPathStyle, false);
+		CFRelease(cfpath);
+		return url;
+	}
+
+	return NULL;
 }
 
 static void usage()
@@ -1172,7 +1274,7 @@ long getFileSize(const char *file)
 	{
 	    if( !(filestat.st_mode & S_IFREG) )	filesize = 0;	/* not a regular file */
 	    else if( !(filestat.st_mode & S_IREAD) ) filesize = 0;	/* not readable */
-	    else filesize = filestat.st_size;
+	    else filesize = (long)filestat.st_size;
 	}
 	
 	return(filesize);
@@ -1428,8 +1530,11 @@ int main (int argc, char * argv[])
 			if(!gfx)
 			{
 				fprintf(stderr, "%s: cannot create gfx data from property list xml inputfile '%s'!\n",argv[0],settings.ifile);
+				if (fileURL) CFRelease(fileURL);
 				exit(1);
 			}
+
+			if(fileURL) CFRelease(fileURL);
 
 			CFRelease(plist);
 		break;
@@ -1505,8 +1610,10 @@ int main (int argc, char * argv[])
 			if(!WritePropertyList(plist,fileURL))
 			{
 				fprintf(stderr, "%s: file '%s' cannot be open for writing property list data\n",argv[0], settings.ofile);
+				if (fileURL) CFRelease(fileURL);
 				exit(1);			
 			}
+			if (fileURL) CFRelease(fileURL);
 			CFRelease(plist);		
 		break;
 	}

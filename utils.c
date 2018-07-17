@@ -327,6 +327,7 @@ int UTF8WriteChar(char *str, unsigned long ch)
 // Skip the leading white space and '0x' or '0X' of a integer string
 char * TrimHexStr (char *Str, int *IsHex)
 {
+  int ZeroPrefix = 0;
   *IsHex = 0;
 
   // skip preceeding white space
@@ -338,13 +339,14 @@ char * TrimHexStr (char *Str, int *IsHex)
   // skip preceeding zeros
   while (*Str && *Str == '0') 
   {
-    Str += 1;
+    Str++;
+    ZeroPrefix++;
   }
   // skip preceeding character 'x'
   if (*Str && (*Str == 'x' || *Str == 'X')) 
   {
     Str += 1;
-    *IsHex = 1;
+    *IsHex = ZeroPrefix == 1;
   }
 
   return Str;

@@ -8,11 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		8DD76F770486A8DE00D96B5E /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 08FB7796FE84155DC02AAC07 /* main.c */; settings = {ATTRIBUTES = (); }; };
-		8DD76F790486A8DE00D96B5E /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 09AB6884FE841BABC02AAC07 /* CoreFoundation.framework */; };
 		8DD76F7C0486A8DE00D96B5E /* gfxutil.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = C6859E970290921104C91782 /* gfxutil.1 */; };
 		9813AB380D12A271001DF28C /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 9813AB360D12A271001DF28C /* utils.c */; };
 		98CAD1240D322BF900808BB2 /* efidevp.c in Sources */ = {isa = PBXBuildFile; fileRef = 98CAD1230D322BF900808BB2 /* efidevp.c */; };
-		98CAD5760D360EF400808BB2 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 98CAD5750D360EF400808BB2 /* IOKit.framework */; };
+		CE363A8220FE90F000ED7DC0 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE363A8120FE90F000ED7DC0 /* IOKit.framework */; };
+		CE363A8420FE90FC00ED7DC0 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE363A8320FE90FC00ED7DC0 /* CoreFoundation.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -30,15 +30,16 @@
 
 /* Begin PBXFileReference section */
 		08FB7796FE84155DC02AAC07 /* main.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
-		09AB6884FE841BABC02AAC07 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = /System/Library/Frameworks/CoreFoundation.framework; sourceTree = "<absolute>"; };
 		8DD76F7E0486A8DE00D96B5E /* gfxutil */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = gfxutil; sourceTree = BUILT_PRODUCTS_DIR; };
 		9813AB360D12A271001DF28C /* utils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = utils.c; sourceTree = "<group>"; };
 		9813AB370D12A271001DF28C /* utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = utils.h; sourceTree = "<group>"; };
 		98C862550D28CB8000DAEFF5 /* efidevp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = efidevp.h; sourceTree = "<group>"; };
 		98CAD1230D322BF900808BB2 /* efidevp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = efidevp.c; sourceTree = "<group>"; };
 		98CAD3FE0D3381B500808BB2 /* main.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = main.h; sourceTree = "<group>"; };
-		98CAD5750D360EF400808BB2 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = /System/Library/Frameworks/IOKit.framework; sourceTree = "<absolute>"; };
 		C6859E970290921104C91782 /* gfxutil.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = gfxutil.1; sourceTree = "<group>"; };
+		CE363A8120FE90F000ED7DC0 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
+		CE363A8320FE90FC00ED7DC0 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
+		CEC0494720FEA1B300FBCAC9 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -46,8 +47,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8DD76F790486A8DE00D96B5E /* CoreFoundation.framework in Frameworks */,
-				98CAD5760D360EF400808BB2 /* IOKit.framework in Frameworks */,
+				CE363A8420FE90FC00ED7DC0 /* CoreFoundation.framework in Frameworks */,
+				CE363A8220FE90F000ED7DC0 /* IOKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -57,11 +58,10 @@
 		08FB7794FE84155DC02AAC07 /* gfxutil */ = {
 			isa = PBXGroup;
 			children = (
-				98CAD5750D360EF400808BB2 /* IOKit.framework */,
 				08FB7795FE84155DC02AAC07 /* Source */,
 				C6859E96029091FE04C91782 /* Documentation */,
-				08FB779DFE84155DC02AAC07 /* External Frameworks and Libraries */,
 				19C28FBDFE9D53C911CA2CBB /* Products */,
+				CE363A8020FE90F000ED7DC0 /* Frameworks */,
 			);
 			name = gfxutil;
 			sourceTree = "<group>";
@@ -79,14 +79,6 @@
 			name = Source;
 			sourceTree = "<group>";
 		};
-		08FB779DFE84155DC02AAC07 /* External Frameworks and Libraries */ = {
-			isa = PBXGroup;
-			children = (
-				09AB6884FE841BABC02AAC07 /* CoreFoundation.framework */,
-			);
-			name = "External Frameworks and Libraries";
-			sourceTree = "<group>";
-		};
 		19C28FBDFE9D53C911CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -99,8 +91,18 @@
 			isa = PBXGroup;
 			children = (
 				C6859E970290921104C91782 /* gfxutil.1 */,
+				CEC0494720FEA1B300FBCAC9 /* README.md */,
 			);
 			name = Documentation;
+			sourceTree = "<group>";
+		};
+		CE363A8020FE90F000ED7DC0 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				CE363A8320FE90FC00ED7DC0 /* CoreFoundation.framework */,
+				CE363A8120FE90F000ED7DC0 /* IOKit.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -172,6 +174,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
+				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = gfxutil;
 				ZERO_LINK = YES;
 			};
@@ -191,6 +194,8 @@
 		1DEB924C08733DCA0010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
@@ -217,15 +222,19 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				ONLY_ACTIVE_ARCH = YES;
 				PREBINDING = NO;
-				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
+				SDKROOT = macosx;
+				VALID_ARCHS = "i386 x86_64";
 			};
 			name = Debug;
 		};
 		1DEB924D08733DCA0010E9CD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
@@ -251,8 +260,10 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				PREBINDING = NO;
-				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
+				SDKROOT = macosx;
+				VALID_ARCHS = "i386 x86_64";
 			};
 			name = Release;
 		};
