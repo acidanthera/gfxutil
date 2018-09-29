@@ -263,11 +263,11 @@ int is_string(void * buffer, int size)
 {
 	int i;
 	
-	for(i=0;i < size; i++)
+	for(i=0;i < size-1; i++)
 	{
 		if(!IS_ALPHANUMMARK( ((unsigned char *)buffer)[i]) ) return 0;
 	}
-	return 1;
+	return size > 0 && ((unsigned char *)buffer)[size-1] == '\0';
 }
 
 void dump_buffer(void * buffer, int size)
@@ -904,7 +904,8 @@ GFX_HEADER *CreateGFXFromPlist(CFPropertyListRef plist)
 				else
 				{
 					gfx_entry->val = bytes;
-					gfx_entry->val_len = (unsigned int)(needed-1); // exclude string terminator
+					// Including string terminator makes sense here, as strings in IOData must end with \0, as shown in IORegExplorer.
+					gfx_entry->val_len = (unsigned int)(needed + 1);
 					gfx_entry->val_type = DATA_STRING;
 				}			
 			}
