@@ -37,6 +37,7 @@
 		98CAD1230D322BF900808BB2 /* efidevp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = efidevp.c; sourceTree = "<group>"; };
 		98CAD3FE0D3381B500808BB2 /* main.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = main.h; sourceTree = "<group>"; };
 		C6859E970290921104C91782 /* gfxutil.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = gfxutil.1; sourceTree = "<group>"; };
+		CE147CCF2185E87400536AE6 /* Changelog.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Changelog.md; sourceTree = "<group>"; };
 		CE363A8120FE90F000ED7DC0 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
 		CE363A8320FE90FC00ED7DC0 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		CEC0494720FEA1B300FBCAC9 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
@@ -92,6 +93,7 @@
 			children = (
 				C6859E970290921104C91782 /* gfxutil.1 */,
 				CEC0494720FEA1B300FBCAC9 /* README.md */,
+				CE147CCF2185E87400536AE6 /* Changelog.md */,
 			);
 			name = Documentation;
 			sourceTree = "<group>";
