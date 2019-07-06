@@ -1,5 +1,7 @@
 gfxutil changelog
 =================
+#### 1.78b
+- Unified release archive names
 
 #### 1.77b
 - Fix string saving cutting down 2 bytes
