@@ -936,10 +936,11 @@ io_iterator_t RecursiveFindDevicePath(io_iterator_t iterator, const io_string_t 
 				}				
 				else
 				{
-					status = IOObjectGetClass(previous, class);
-					assertion(status == KERN_SUCCESS, "can't obtain class name");				
-					fprintf(stderr, "error: unsupported registry entry class type '%s'.\n",class);
-					exit(1);					
+					//status = IOObjectGetClass(previous, class);
+					//assertion(status == KERN_SUCCESS, "can't obtain class name");
+					//fprintf(stderr, "error: unsupported registry entry class type '%s'.\n",class);
+					//exit(1);
+					continue;
 				}
 				
 				if(DeviceNode != NULL)
