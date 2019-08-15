@@ -1,5 +1,8 @@
 gfxutil changelog
 =================
+#### 1.79b
+- Fix unsupported registry entry class type error
+
 #### 1.78b
 - Unified release archive names
 
