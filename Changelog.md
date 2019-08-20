@@ -1,5 +1,8 @@
 gfxutil changelog
 =================
+#### 1.80b
+- Run without command line args to get devicepaths for all PCI devices
+
 #### 1.79b
 - Fix unsupported registry entry class type error
 

@@ -1078,6 +1078,138 @@ CFURLRef URLCreate(const char *path)
 	return NULL;
 }
 
+void getPCIParentDevicePaths(io_service_t device, io_string_t deviceName, io_string_t devicePath)
+{
+	io_string_t temp = {};
+	kern_return_t kr;
+	io_iterator_t parentIterator;
+	
+	kr = IORegistryEntryGetParentIterator(device, kIODeviceTreePlane, &parentIterator);
+	
+	if (kr != KERN_SUCCESS)
+		return;
+	
+	for (io_service_t parentDevice; IOIteratorIsValid(parentIterator) && (parentDevice = IOIteratorNext(parentIterator)); IOObjectRelease(parentDevice))
+	{
+		if (IOObjectConformsTo(parentDevice, "IOPCIDevice"))
+		{
+			io_name_t locationInPlane = {};
+			kr = IORegistryEntryGetLocationInPlane(parentDevice, kIODeviceTreePlane, locationInPlane);
+			
+			if (kr == KERN_SUCCESS)
+			{
+				io_name_t name = {};
+				
+				kr = IORegistryEntryGetName(parentDevice, name);
+				
+				if (kr == KERN_SUCCESS)
+				{
+					sprintf(temp, "%s.%s", name, deviceName);
+					strcpy(deviceName, temp);
+				}
+				
+				const char *deviceLocation = NULL, *functionLocation = NULL;
+				unsigned int deviceInt = 0, functionInt = 0;
+				
+				deviceLocation = strtok(locationInPlane, ",");
+				functionLocation = strtok(NULL, ",");
+				
+				if (deviceLocation != NULL)
+					deviceInt = (unsigned int)strtol(deviceLocation, NULL, 16);
+				
+				if (functionLocation != NULL)
+					functionInt = (unsigned int)strtol(functionLocation, NULL, 16);
+				
+				sprintf(temp, "Pci(0x%x,0x%x)/%s", deviceInt, functionInt, devicePath);
+				strcpy(devicePath, temp);
+			}
+		}
+		
+		getPCIParentDevicePaths(parentDevice, deviceName, devicePath);
+	}
+}
+
+void getPCIRootDevicePath(io_service_t device, io_string_t devicePath)
+{
+	io_string_t temp = {};
+	kern_return_t kr;
+	io_iterator_t parentIterator;
+	
+	kr = IORegistryEntryGetParentIterator(device, kIODeviceTreePlane, &parentIterator);
+	
+	if (kr != KERN_SUCCESS)
+		return;
+	
+	for (io_service_t parentDevice; IOIteratorIsValid(parentIterator) && (parentDevice = IOIteratorNext(parentIterator)); IOObjectRelease(parentDevice))
+	{
+		if (IOObjectConformsTo(parentDevice, "IOACPIPlatformDevice"))
+		{
+			io_struct_inband_t uid = {};
+			uint32_t size = sizeof(uid);
+			
+			kr = IORegistryEntryGetProperty(parentDevice, "_UID", uid, &size);
+			
+			if (kr == KERN_SUCCESS)
+			{
+				unsigned int uidInt = 0;
+				
+				uidInt = (unsigned int)strtol(uid, NULL, 16);
+				
+				sprintf(temp, "PciRoot(0x%x)/%s", uidInt, devicePath);
+				strcpy(devicePath, temp);
+			}
+		}
+		
+		getPCIRootDevicePath(parentDevice, devicePath);
+	}
+}
+
+void OutputPCIDevicePaths()
+{
+	io_iterator_t iterator;
+	
+	kern_return_t kr = IOServiceGetMatchingServices(kIOMasterPortDefault, IOServiceMatching("IOPCIDevice"), &iterator);
+	
+	if (kr == KERN_SUCCESS)
+	{
+		for (io_service_t device; IOIteratorIsValid(iterator) && (device = IOIteratorNext(iterator)); IOObjectRelease(device))
+		{
+			io_string_t devicePath = {};
+			io_name_t deviceName = {};
+			
+			kr = IORegistryEntryGetName(device, deviceName);
+			
+			if (kr != KERN_SUCCESS)
+				continue;
+			
+			io_name_t locationInPlane = {};
+			kern_return_t kr = IORegistryEntryGetLocationInPlane(device, kIODeviceTreePlane, locationInPlane);
+			
+			if (kr != KERN_SUCCESS)
+				continue;
+			
+			const char *deviceLocation = NULL, *functionLocation = NULL;
+			unsigned int deviceInt = 0, functionInt = 0;
+			
+			deviceLocation = strtok(locationInPlane, ",");
+			functionLocation = strtok(NULL, ",");
+			
+			if (deviceLocation != NULL)
+				deviceInt = (unsigned int)strtol(deviceLocation, NULL, 16);
+			
+			if (functionLocation != NULL)
+				functionInt = (unsigned int)strtol(functionLocation, NULL, 16);
+			
+			sprintf(devicePath, "Pci(0x%x,0x%x)", deviceInt, functionInt);
+			
+			getPCIParentDevicePaths(device, deviceName, devicePath);
+			getPCIRootDevicePath(device, devicePath);
+			
+			printf("%s = %s\n", deviceName, devicePath);
+		}
+	}
+}
+
 static void usage()
 {
 	fprintf(stdout, "\n");
@@ -1086,6 +1218,7 @@ static void usage()
 	fprintf(stdout, "\n");
 	fprintf(stdout, "gfxutil: [command_option] [other_options] infile outfile\n");
 	fprintf(stdout, "Command options are:\n");
+	fprintf(stdout, "[none]\t\tlist all devicepaths for PCI devices in IODeviceTree plane\n");
 	fprintf(stdout, "-f name\t\tfinds object devicepath with the given name from IODeviceTree plane\n");
 	fprintf(stdout, "-h\t\tprint this summary\n");	
 	fprintf(stdout, "-a\t\tshow version\n");
@@ -1123,6 +1256,7 @@ int parse_args(int argc, char * argv[], SETTINGS *settings)
 	/*********************************************************
 		gfxutil: [command_option] [other_options] infile outfile
 		Command options are:
+	    [none]		list all devicepaths for PCI devices in IODeviceTree plane
 		-f name		finds objects devicepath with the given name from IODeviceTree plane
 		-h			print this summary
 		-a			show version
@@ -1254,8 +1388,7 @@ int parse_args(int argc, char * argv[], SETTINGS *settings)
 	}
 	else
 	{
-		printf("Insuffient arguments!\n");
-		usage();
+		OutputPCIDevicePaths();
 	}
 	
 	return 0;

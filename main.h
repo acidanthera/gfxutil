@@ -9,7 +9,7 @@
 
 // Constants
 #define MAX_FILENAME 255
-#define VERSION "1.79b"
+#define VERSION "1.80b"
 
 const unsigned char _HexTabLC[16]= "0123456789abcdef";
 const unsigned char _HexTabUC[16]= "0123456789ABCDEF";
