@@ -1127,6 +1127,8 @@ void getPCIParentDevicePaths(io_service_t device, io_string_t deviceName, io_str
 		
 		getPCIParentDevicePaths(parentDevice, deviceName, devicePath);
 	}
+	
+	IOObjectRelease(parentIterator);
 }
 
 void getPCIRootDevicePath(io_service_t device, io_string_t devicePath)
@@ -1162,6 +1164,8 @@ void getPCIRootDevicePath(io_service_t device, io_string_t devicePath)
 		
 		getPCIRootDevicePath(parentDevice, devicePath);
 	}
+	
+	IOObjectRelease(parentIterator);
 }
 
 void OutputPCIDevicePaths()
@@ -1170,44 +1174,46 @@ void OutputPCIDevicePaths()
 	
 	kern_return_t kr = IOServiceGetMatchingServices(kIOMasterPortDefault, IOServiceMatching("IOPCIDevice"), &iterator);
 	
-	if (kr == KERN_SUCCESS)
+	if (kr != KERN_SUCCESS)
+		return;
+	
+	for (io_service_t device; IOIteratorIsValid(iterator) && (device = IOIteratorNext(iterator)); IOObjectRelease(device))
 	{
-		for (io_service_t device; IOIteratorIsValid(iterator) && (device = IOIteratorNext(iterator)); IOObjectRelease(device))
-		{
-			io_string_t devicePath = {};
-			io_name_t deviceName = {};
-			
-			kr = IORegistryEntryGetName(device, deviceName);
-			
-			if (kr != KERN_SUCCESS)
-				continue;
-			
-			io_name_t locationInPlane = {};
-			kern_return_t kr = IORegistryEntryGetLocationInPlane(device, kIODeviceTreePlane, locationInPlane);
-			
-			if (kr != KERN_SUCCESS)
-				continue;
-			
-			const char *deviceLocation = NULL, *functionLocation = NULL;
-			unsigned int deviceInt = 0, functionInt = 0;
-			
-			deviceLocation = strtok(locationInPlane, ",");
-			functionLocation = strtok(NULL, ",");
-			
-			if (deviceLocation != NULL)
-				deviceInt = (unsigned int)strtol(deviceLocation, NULL, 16);
-			
-			if (functionLocation != NULL)
-				functionInt = (unsigned int)strtol(functionLocation, NULL, 16);
-			
-			sprintf(devicePath, "Pci(0x%x,0x%x)", deviceInt, functionInt);
-			
-			getPCIParentDevicePaths(device, deviceName, devicePath);
-			getPCIRootDevicePath(device, devicePath);
-			
-			printf("%s = %s\n", deviceName, devicePath);
-		}
+		io_string_t devicePath = {};
+		io_name_t deviceName = {};
+		
+		kr = IORegistryEntryGetName(device, deviceName);
+		
+		if (kr != KERN_SUCCESS)
+			continue;
+		
+		io_name_t locationInPlane = {};
+		kern_return_t kr = IORegistryEntryGetLocationInPlane(device, kIODeviceTreePlane, locationInPlane);
+		
+		if (kr != KERN_SUCCESS)
+			continue;
+		
+		const char *deviceLocation = NULL, *functionLocation = NULL;
+		unsigned int deviceInt = 0, functionInt = 0;
+		
+		deviceLocation = strtok(locationInPlane, ",");
+		functionLocation = strtok(NULL, ",");
+		
+		if (deviceLocation != NULL)
+			deviceInt = (unsigned int)strtol(deviceLocation, NULL, 16);
+		
+		if (functionLocation != NULL)
+			functionInt = (unsigned int)strtol(functionLocation, NULL, 16);
+		
+		sprintf(devicePath, "Pci(0x%x,0x%x)", deviceInt, functionInt);
+		
+		getPCIParentDevicePaths(device, deviceName, devicePath);
+		getPCIRootDevicePath(device, devicePath);
+		
+		printf("%s = %s\n", deviceName, devicePath);
 	}
+	
+	IOObjectRelease(iterator);
 }
 
 static void usage()
