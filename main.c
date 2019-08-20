@@ -1131,7 +1131,7 @@ void getPCIParentDevicePaths(io_service_t device, io_string_t deviceName, io_str
 	IOObjectRelease(parentIterator);
 }
 
-void getPCIRootDevicePath(io_service_t device, io_string_t devicePath)
+void getPCIRootDevicePath(io_service_t device, io_string_t deviceName, io_string_t devicePath)
 {
 	io_string_t temp = {};
 	kern_return_t kr;
@@ -1146,6 +1146,16 @@ void getPCIRootDevicePath(io_service_t device, io_string_t devicePath)
 	{
 		if (IOObjectConformsTo(parentDevice, "IOACPIPlatformDevice"))
 		{
+			io_name_t name = {};
+			
+			kr = IORegistryEntryGetName(parentDevice, name);
+			
+			if (kr == KERN_SUCCESS)
+			{
+				sprintf(temp, "%s.%s", name, deviceName);
+				strcpy(deviceName, temp);
+			}
+			
 			io_struct_inband_t uid = {};
 			uint32_t size = sizeof(uid);
 			
@@ -1162,7 +1172,7 @@ void getPCIRootDevicePath(io_service_t device, io_string_t devicePath)
 			}
 		}
 		
-		getPCIRootDevicePath(parentDevice, devicePath);
+		getPCIRootDevicePath(parentDevice, deviceName, devicePath);
 	}
 	
 	IOObjectRelease(parentIterator);
@@ -1208,7 +1218,7 @@ void OutputPCIDevicePaths()
 		sprintf(devicePath, "Pci(0x%x,0x%x)", deviceInt, functionInt);
 		
 		getPCIParentDevicePaths(device, deviceName, devicePath);
-		getPCIRootDevicePath(device, devicePath);
+		getPCIRootDevicePath(device, deviceName, devicePath);
 		
 		printf("%s = %s\n", deviceName, devicePath);
 	}
