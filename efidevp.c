@@ -836,7 +836,6 @@ io_iterator_t RecursiveFindDevicePath(io_iterator_t iterator, const io_string_t 
 	io_struct_inband_t		prop_name;
 	io_struct_inband_t		prop_ioname;
 	io_struct_inband_t		prop_uid;	
-	io_name_t				class;          // (don't release)
 	kern_return_t			status     = KERN_SUCCESS;
 	ACPI_HID_DEVICE_PATH	*Acpi = NULL;
 	EFI_DEVICE_PATH			*NewDevicePath;
