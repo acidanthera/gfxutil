@@ -93,6 +93,27 @@ typedef struct _ACPI_HID_DEVICE_PATH
 	UINT32	UID;
 } ACPI_HID_DEVICE_PATH;
 
+typedef struct {
+	UINT32 Data1;
+	UINT16 Data2;
+	UINT16 Data3;
+	UINT8 Data4[2];
+	UINT8 Data5[6];
+} UUID;
+
+#define MEDIA_DEVICE_PATH 0x04
+
+#define MEDIA_HARDDRIVE_DP 0x01
+typedef struct {
+	EFI_DEVICE_PATH Header;
+	UINT32 PartitionNumber;
+	UINT64 PartitionStart;
+	UINT64 PartitionSize;
+	UUID UUid;
+	UINT8 MBRType;
+	UINT8 SignatureType;
+} HARDDRIVE_DEVICE_PATH;
+
 // 
 //  EISA ID Macro
 //  EISA ID Definition 32-bits
@@ -115,6 +136,9 @@ CHAR8 *ConvertDeviceNodeToText (const EFI_DEVICE_PATH  *DeviceNode, BOOLEAN Disp
 
 // Convert a device path to its text representation.
 CHAR8 *ConvertDevicePathToText (const EFI_DEVICE_PATH  *DeviceNode, BOOLEAN DisplayOnly, BOOLEAN AllowShortcuts);
+
+// Convert a HDD device path to its text representation.
+CHAR8 *ConvertHDDDevicePathToText (const EFI_DEVICE_PATH  *DeviceNode);
 
 // Convert text to the binary representation of a device node.
 EFI_DEVICE_PATH *ConvertTextToDeviceNode (const CHAR8 *TextDeviceNode);

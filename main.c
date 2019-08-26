@@ -1080,7 +1080,7 @@ CFURLRef URLCreate(const char *path)
 
 void getPCIParentDevicePaths(io_service_t device, io_string_t deviceName, io_string_t devicePath)
 {
-	io_string_t temp = {};
+	io_string_t temp = {0};
 	kern_return_t kr;
 	io_iterator_t parentIterator;
 	
@@ -1093,24 +1093,15 @@ void getPCIParentDevicePaths(io_service_t device, io_string_t deviceName, io_str
 	{
 		if (IOObjectConformsTo(parentDevice, "IOPCIDevice"))
 		{
-			io_name_t locationInPlane = {};
+			io_name_t name = {0}, locationInPlane = {0};
+			const char *deviceLocation = NULL, *functionLocation = NULL;
+			unsigned int deviceInt = 0, functionInt = 0;
+			
+			kr = IORegistryEntryGetName(parentDevice, name);
 			kr = IORegistryEntryGetLocationInPlane(parentDevice, kIODeviceTreePlane, locationInPlane);
 			
 			if (kr == KERN_SUCCESS)
 			{
-				io_name_t name = {};
-				
-				kr = IORegistryEntryGetName(parentDevice, name);
-				
-				if (kr == KERN_SUCCESS)
-				{
-					sprintf(temp, "%s.%s", name, deviceName);
-					strcpy(deviceName, temp);
-				}
-				
-				const char *deviceLocation = NULL, *functionLocation = NULL;
-				unsigned int deviceInt = 0, functionInt = 0;
-				
 				deviceLocation = strtok(locationInPlane, ",");
 				functionLocation = strtok(NULL, ",");
 				
@@ -1119,10 +1110,13 @@ void getPCIParentDevicePaths(io_service_t device, io_string_t deviceName, io_str
 				
 				if (functionLocation != NULL)
 					functionInt = (unsigned int)strtol(functionLocation, NULL, 16);
-				
-				sprintf(temp, "Pci(0x%x,0x%x)/%s", deviceInt, functionInt, devicePath);
-				strcpy(devicePath, temp);
 			}
+			
+			sprintf(temp, "%s.%s", name, deviceName);
+			strcpy(deviceName, temp);
+			
+			sprintf(temp, "Pci(0x%x,0x%x)/%s", deviceInt, functionInt, devicePath);
+			strcpy(devicePath, temp);
 		}
 		
 		getPCIParentDevicePaths(parentDevice, deviceName, devicePath);
@@ -1133,7 +1127,7 @@ void getPCIParentDevicePaths(io_service_t device, io_string_t deviceName, io_str
 
 void getPCIRootDevicePath(io_service_t device, io_string_t deviceName, io_string_t devicePath)
 {
-	io_string_t temp = {};
+	io_string_t temp = {0};
 	kern_return_t kr;
 	io_iterator_t parentIterator;
 	
@@ -1146,30 +1140,46 @@ void getPCIRootDevicePath(io_service_t device, io_string_t deviceName, io_string
 	{
 		if (IOObjectConformsTo(parentDevice, "IOACPIPlatformDevice"))
 		{
-			io_name_t name = {};
+			io_name_t name = {0};
+			io_struct_inband_t pnp = {0}, uid = {0};
+			uint32_t size = sizeof(uid);
 			
 			kr = IORegistryEntryGetName(parentDevice, name);
 			
-			if (kr == KERN_SUCCESS)
-			{
-				sprintf(temp, "%s.%s", name, deviceName);
-				strcpy(deviceName, temp);
-			}
-			
-			io_struct_inband_t uid = {};
-			uint32_t size = sizeof(uid);
-			
 			kr = IORegistryEntryGetProperty(parentDevice, "_UID", uid, &size);
 			
-			if (kr == KERN_SUCCESS)
+			size = sizeof(pnp);
+			kr = IORegistryEntryGetProperty(parentDevice, "compatible", pnp, &size);
+			
+			if (kr != KERN_SUCCESS)
 			{
-				unsigned int uidInt = 0;
-				
-				uidInt = (unsigned int)strtol(uid, NULL, 16);
-				
-				sprintf(temp, "PciRoot(0x%x)/%s", uidInt, devicePath);
-				strcpy(devicePath, temp);
+				size = sizeof(pnp);
+				kr = IORegistryEntryGetProperty(parentDevice, "name", pnp, &size);
 			}
+
+			unsigned int uidInt = (unsigned int)strtol(uid, NULL, 16);
+			unsigned int pnpId = (unsigned int)(strlen(pnp) > 3 ? strtol(pnp + 3, NULL, 16) : 0);
+			unsigned int eisaId = (strlen(pnp) > 3 ? (((pnp[0] - '@') & 0x1f) << 10) + (((pnp[1] - '@') & 0x1f) << 5) + ((pnp[2] - '@') & 0x1f) + (pnpId << 16) : 0);
+			
+			sprintf(temp, "%s.%s", name, deviceName);
+			strcpy(deviceName, temp);
+			
+			if ((eisaId & PNP_EISA_ID_MASK) == PNP_EISA_ID_CONST)
+			{
+				switch (EISA_ID_TO_NUM(eisaId))
+				{
+					case 0x0a03:
+						sprintf(temp, "PciRoot(0x%x)/%s", uidInt, devicePath);
+						break;
+					default:
+						sprintf(temp, "Acpi(PNP%04x,0x%x)/%s", EISA_ID_TO_NUM(eisaId), uidInt, devicePath);
+						break;
+				}
+			}
+			else
+				sprintf(temp, "Acpi(0x%08x,0x%x)/%s", eisaId, uidInt, devicePath);
+			
+			strcpy(devicePath, temp);
 		}
 		
 		getPCIRootDevicePath(parentDevice, deviceName, devicePath);
@@ -1189,31 +1199,29 @@ void OutputPCIDevicePaths()
 	
 	for (io_service_t device; IOIteratorIsValid(iterator) && (device = IOIteratorNext(iterator)); IOObjectRelease(device))
 	{
-		io_string_t devicePath = {};
-		io_name_t deviceName = {};
+		io_string_t devicePath = {0};
+		io_name_t deviceName = {0}, locationInPlane = {0};
+		const char *deviceLocation = NULL, *functionLocation = NULL;
+		unsigned int deviceInt = 0, functionInt = 0;
 		
 		kr = IORegistryEntryGetName(device, deviceName);
 		
 		if (kr != KERN_SUCCESS)
 			continue;
 		
-		io_name_t locationInPlane = {};
-		kern_return_t kr = IORegistryEntryGetLocationInPlane(device, kIODeviceTreePlane, locationInPlane);
+		kr = IORegistryEntryGetLocationInPlane(device, kIODeviceTreePlane, locationInPlane);
 		
-		if (kr != KERN_SUCCESS)
-			continue;
-		
-		const char *deviceLocation = NULL, *functionLocation = NULL;
-		unsigned int deviceInt = 0, functionInt = 0;
-		
-		deviceLocation = strtok(locationInPlane, ",");
-		functionLocation = strtok(NULL, ",");
-		
-		if (deviceLocation != NULL)
-			deviceInt = (unsigned int)strtol(deviceLocation, NULL, 16);
-		
-		if (functionLocation != NULL)
-			functionInt = (unsigned int)strtol(functionLocation, NULL, 16);
+		if (kr == KERN_SUCCESS)
+		{
+			deviceLocation = strtok(locationInPlane, ",");
+			functionLocation = strtok(NULL, ",");
+			
+			if (deviceLocation != NULL)
+				deviceInt = (unsigned int)strtol(deviceLocation, NULL, 16);
+			
+			if (functionLocation != NULL)
+				functionInt = (unsigned int)strtol(functionLocation, NULL, 16);
+		}
 		
 		sprintf(devicePath, "Pci(0x%x,0x%x)", deviceInt, functionInt);
 		
@@ -1236,10 +1244,12 @@ static void usage()
 	fprintf(stdout, "Command options are:\n");
 	fprintf(stdout, "[none]\t\tlist all devicepaths for PCI devices in IODeviceTree plane\n");
 	fprintf(stdout, "-f name\t\tfinds object devicepath with the given name from IODeviceTree plane\n");
-	fprintf(stdout, "-h\t\tprint this summary\n");	
+	fprintf(stdout, "-h\t\tprint this summary\n");
 	fprintf(stdout, "-a\t\tshow version\n");
 	fprintf(stdout, "-i fmt\t\tinfile type, fmt is one of (default is hex): xml bin hex\n");
 	fprintf(stdout, "-o fmt\t\toutfile type, fmt is one of (default is xml): xml bin hex\n");
+	fprintf(stdout, "-d path prop\toutput the hdd devicepath, path is the ioreg path, prop is the property\n");
+	fprintf(stdout, "\t\t(Eg. gfxutil -d IODeviceTree:/chosen boot-device-path)\n");
 	fprintf(stdout, "There are some additional optional arguments:\n");
 	fprintf(stdout, "-v\t\tverbose mode\n");
 	fprintf(stdout, "-s\t\tautomatically detect string format from binary data\n");
@@ -1272,18 +1282,20 @@ int parse_args(int argc, char * argv[], SETTINGS *settings)
 	/*********************************************************
 		gfxutil: [command_option] [other_options] infile outfile
 		Command options are:
-	    [none]		list all devicepaths for PCI devices in IODeviceTree plane
-		-f name		finds objects devicepath with the given name from IODeviceTree plane
-		-h			print this summary
-		-a			show version
-		-i fmt		infile type, fmt is one of (default is hex): xml bin hex
-		-o fmt		outfile type, fmt is one of (default is xml): xml bin hex
+	    [none]			list all devicepaths for PCI devices in IODeviceTree plane
+		-f name			finds objects devicepath with the given name from IODeviceTree plane
+		-h				print this summary
+		-a				show version
+		-i fmt			infile type, fmt is one of (default is hex): xml bin hex
+		-o fmt			outfile type, fmt is one of (default is xml): xml bin hex
+		-d path prop	output the hdd devicepath, path is the ioreg path, prop is the property
+						(Eg. gfxutil -d IODeviceTree:/chosen boot-device-path)
 		There are some additional optional arguments:
-		-v			verbose mode
-		-s			automatically detect string format from binary data
-		-n			automatically detect numeric format from binary data
+		-v				verbose mode
+		-s				automatically detect string format from binary data
+		-n				automatically detect numeric format from binary data
 	*********************************************************/
-	while((c = getopt(argc, argv, "f:snvahi:o:") ) != -1)
+	while((c = getopt(argc, argv, "f:dsnvahi:o:") ) != -1)
 	{
 		switch(c)
 		{
@@ -1309,6 +1321,37 @@ int parse_args(int argc, char * argv[], SETTINGS *settings)
 				}
 				return 0;
 			break;
+			case 'd':
+				if (argc != 4)
+					return 0;
+				
+				io_registry_entry_t device = IORegistryEntryFromPath(kIOMasterPortDefault, argv[2]);
+				
+				if (device != MACH_PORT_NULL)
+				{
+					char buffer[4096] = {0};
+					uint32_t size = sizeof(buffer);
+					
+					kern_return_t kr = IORegistryEntryGetProperty(device, argv[3], buffer, &size);
+					
+					if (kr == KERN_SUCCESS)
+					{
+						devpath_text = ConvertHDDDevicePathToText((const EFI_DEVICE_PATH *)buffer);
+						printf("DevicePath = %s\n",(devpath_text != NULL)?devpath_text:"???");
+						free(devpath_text);
+					}
+					else
+					{
+						printf("DevicePath not found!\n");
+					}
+					
+					IOObjectRelease(device);
+				}
+				else
+				{
+					printf("DevicePath not found!\n");
+				}
+				return 0;
 			case 'v':
 				settings->verbose = 1;
 			break;

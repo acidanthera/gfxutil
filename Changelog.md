@@ -3,7 +3,7 @@ gfxutil changelog
 #### 1.79b
 - Fix unsupported registry entry class type error
 - Run without command line args to get devicepaths for all PCI devices
-- Add root device name to PCI output
+- Add HDD device path output
 
 #### 1.78b
 - Unified release archive names

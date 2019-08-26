@@ -539,6 +539,15 @@ EFI_DEVICE_PATH *DevPathFromTextAcpi (CHAR8 *TextDeviceNode)
   return (EFI_DEVICE_PATH *) Acpi;
 }
 
+void MediaDevPathToTextHDD (CHAR8 *Str, void *DevPath)
+{
+	HARDDRIVE_DEVICE_PATH  *Hdd;
+	
+	Hdd = DevPath;
+	
+	CatPrintf(Str, "%04X-%02X-%02X-%1X%1X-%1X%1X%1X%1X%1X%1X", Hdd->UUid.Data1, Hdd->UUid.Data2, Hdd->UUid.Data3, Hdd->UUid.Data4[0], Hdd->UUid.Data4[1], Hdd->UUid.Data5[0], Hdd->UUid.Data5[1], Hdd->UUid.Data5[2], Hdd->UUid.Data5[3], Hdd->UUid.Data5[4], Hdd->UUid.Data5[5]);
+}
+
 EFI_DEVICE_PATH *ConvertFromTextAcpi (CHAR8 *TextDeviceNode, UINT32 PnPId)
 {
   CHAR8 *UIDStr;
@@ -815,6 +824,50 @@ CHAR8 *ConvertDevicePathToText (const EFI_DEVICE_PATH *DevicePath, BOOLEAN Displ
 
 		// Next device path node
 		DevPathNode = NextDevicePathNode (DevPathNode);
+	}
+	
+	// Shrink pool used for string allocation
+	free(UnpackDevPath);
+	NewSize = (UINT32)(strlen(Str) + 1);
+	Str = realloc(Str, NewSize);
+	assert(Str != NULL);
+	Str[strlen(Str)] = 0;
+	return Str;
+}
+
+// Convert a HDD device path to its text representation.
+CHAR8 *ConvertHDDDevicePathToText (const EFI_DEVICE_PATH *DeviceNode)
+{
+	CHAR8				*Str;
+	EFI_DEVICE_PATH		*DevPathNode;
+	EFI_DEVICE_PATH		*UnpackDevPath;
+	UINT32				NewSize;
+	
+	if (DeviceNode == NULL)
+	{
+		return NULL;
+	}
+	
+	Str = (CHAR8 *)calloc(MAX_PATH_LEN, sizeof(CHAR8));
+	
+	// Unpacked the device path
+	UnpackDevPath = UnpackDevicePath ((EFI_DEVICE_PATH *) DeviceNode);
+	assert(UnpackDevPath != NULL);
+	
+	// Process each device path node
+	DevPathNode = UnpackDevPath;
+	while (!IsDevicePathEnd (DevPathNode))
+	{
+		if (DevicePathType (DevPathNode) != MEDIA_DEVICE_PATH || DevicePathSubType (DevPathNode) != MEDIA_HARDDRIVE_DP)
+		{
+			DevPathNode = NextDevicePathNode (DevPathNode);
+			continue;
+		}
+		
+		// Print this node of the device path
+		MediaDevPathToTextHDD (Str, DevPathNode);
+		
+		break;
 	}
 	
 	// Shrink pool used for string allocation
