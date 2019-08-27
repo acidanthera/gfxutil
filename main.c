@@ -1097,7 +1097,7 @@ void getPCIParentDevicePaths(io_service_t device, io_string_t deviceName, io_str
 			const char *deviceLocation = NULL, *functionLocation = NULL;
 			unsigned int deviceInt = 0, functionInt = 0;
 			
-			kr = IORegistryEntryGetName(parentDevice, name);
+			IORegistryEntryGetName(parentDevice, name);
 			kr = IORegistryEntryGetLocationInPlane(parentDevice, kIODeviceTreePlane, locationInPlane);
 			
 			if (kr == KERN_SUCCESS)
@@ -1144,9 +1144,9 @@ void getPCIRootDevicePath(io_service_t device, io_string_t deviceName, io_string
 			io_struct_inband_t pnp = {0}, uid = {0};
 			uint32_t size = sizeof(uid);
 			
-			kr = IORegistryEntryGetName(parentDevice, name);
+			IORegistryEntryGetName(parentDevice, name);
 			
-			kr = IORegistryEntryGetProperty(parentDevice, "_UID", uid, &size);
+			IORegistryEntryGetProperty(parentDevice, "_UID", uid, &size);
 			
 			size = sizeof(pnp);
 			kr = IORegistryEntryGetProperty(parentDevice, "compatible", pnp, &size);
@@ -1154,7 +1154,7 @@ void getPCIRootDevicePath(io_service_t device, io_string_t deviceName, io_string
 			if (kr != KERN_SUCCESS)
 			{
 				size = sizeof(pnp);
-				kr = IORegistryEntryGetProperty(parentDevice, "name", pnp, &size);
+				IORegistryEntryGetProperty(parentDevice, "name", pnp, &size);
 			}
 
 			unsigned int uidInt = (unsigned int)strtol(uid, NULL, 16);
