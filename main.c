@@ -18,8 +18,9 @@
 #include <CoreFoundation/CoreFoundation.h>            // (CFDictionary, ...)
 #include <IOKit/IOCFSerialize.h>                      // (IOCFSerialize, ...)
 #include <IOKit/IOKitLib.h>							  // (IOMasterPort, ...)
-#include "util.h"
+#include "edk2misc.h"
 #include "efidevp.h"
+#include "utils.h"
 #include "main.h"
 
 /*
@@ -116,7 +117,7 @@ static int uni2str(unsigned char *d, unsigned int length, char **str, unsigned i
 	{
 		/* Allocate space for the converted string */
 		// Two unicode characters make up 1 buffer byte. Round up
-		if((*str = (char *)calloc( length*2 + 1, sizeof(char))) == 0)
+		if((*str = (char *)calloc(length*2 + 1, sizeof(char))) == 0)
 		{
 			fprintf(stderr, "unicode2str: out of memory\n");
 			return 0;
@@ -158,7 +159,7 @@ static int uni2str(unsigned char *d, unsigned int length, char **str, unsigned i
 	return 0;
 }
 
-unsigned char _nibbleValue(unsigned char hexchar)
+unsigned char _nibbleValue(CHAR16 hexchar)
 {
 	unsigned char val;
     
@@ -174,17 +175,19 @@ unsigned char _nibbleValue(unsigned char hexchar)
 	
 }
 
-int isHexString(void * buffer, unsigned int Size)
+int isHexString16(CHAR16 * buffer, unsigned int Size)
 {
 	int HexCnt;
 
 	// Find out how many hex characters the string has.
-	for (HexCnt = 0; IS_HEX( ((char *)buffer)[HexCnt] ); HexCnt++);
+	for (HexCnt = 0; IS_HEX( buffer[HexCnt] ); HexCnt++);
 	
 	if( (HexCnt == Size) && (HexCnt != 0) ) return 1;					
 	
 	return 0;	
 }
+
+const unsigned char _HexTabLC[16]= "0123456789abcdef";
 
 /* binary to HEX conversion function -- for Unicode support */
 char *bin2hex(const unsigned char *data, unsigned long size)
@@ -194,7 +197,7 @@ char *bin2hex(const unsigned char *data, unsigned long size)
 	char *pout, *p;
 	unsigned char c;
 	// one binary byte make up 2 hex characters
-	pout = p = (char *)calloc( (size * 2) + 1, sizeof(char)); 
+	pout = p = (char *)calloc((size * 2) + 1, sizeof(char)); 
 	if (!p) 
 	{
 		fprintf(stderr, "bin2hex: out of memory\n");
@@ -228,7 +231,7 @@ unsigned char *hex2bin(const char *data, unsigned long *size)
 		return NULL;
 	}	
 	// two hex characters make up 1 binary byte. Round up.
-	pout = p = (unsigned char *)calloc( (HexCnt + 1) / 2, sizeof(unsigned char)); 
+	pout = p = (unsigned char *)calloc((HexCnt + 1) / 2, sizeof(unsigned char)); 
 	if (!p) 
 	{
 		fprintf(stderr, "hex2bin: out of memory\n");
@@ -259,15 +262,63 @@ unsigned char *hex2bin(const char *data, unsigned long *size)
     return(pout);
 }
 
+/* After the call, length will contain the byte length of binary data. */
+unsigned char *hex2bin16(CHAR16 *data, unsigned long *size)
+{
+	long bcount = 0;
+	CHAR16 *pin = data;
+	unsigned char *pout, *p;
+	unsigned char ch;
+	int HighNibble = 1, HexCnt = 0;
+
+	// Find out how many hex characters the string has.
+	for (HexCnt = 0; IS_HEX(data[HexCnt]); HexCnt++);
+	if (HexCnt == 0)
+	{
+		*size = 0;
+		return NULL;
+	}	
+	// two hex characters make up 1 binary byte. Round up.
+	pout = p = (unsigned char *)calloc((HexCnt + 1) / 2, sizeof(unsigned char)); 
+	if (!p)
+	{
+		fprintf(stderr, "hex2bin16: out of memory\n");
+		return NULL;
+	}
+	
+	// read until string end
+	for( ;*pin != '\0'; pin++)
+	{
+		ch = _nibbleValue(*pin);
+		if(ch > 15)
+			continue;		// not a HEX character
+
+		if(HighNibble)
+		{
+			*p = ch << 4;
+			HighNibble = 0;
+		}
+		else 
+		{
+			*p++ |= ch;
+    	    HighNibble = 1;
+			bcount++;
+		}
+	}
+	
+    *size = bcount;	/* byte count */
+    return(pout);
+}
+
 int is_string(void * buffer, int size)
 {
 	int i;
 	
-	for(i=0;i < size-1; i++)
+	for(i=0;i < size; i++)
 	{
 		if(!IS_ALPHANUMMARK( ((unsigned char *)buffer)[i]) ) return 0;
 	}
-	return size > 0 && ((unsigned char *)buffer)[size-1] == '\0';
+	return size > 0; // && ((unsigned char *)buffer)[size-1] == '\0';
 }
 
 void dump_buffer(void * buffer, int size)
@@ -364,16 +415,16 @@ static void free_gfx_entry_list(GFX_ENTRY *head, GFX_ENTRY *end)
 }
 
 // this reads gfx binary info and parses it
-GFX_HEADER *parse_binary(unsigned char * bp, SETTINGS settings)
+GFX_HEADER *parse_binary(unsigned char * bp, unsigned char * bpend, SETTINGS *settings)
 {
-	GFX_HEADER *gfx_header = (GFX_HEADER *) NULL;
+	GFX_HEADER *gfx_header = NULL;
 	// head points to the first node in list, end points to the last node in list
-	GFX_BLOCKHEADER *gfx_blockheader = (GFX_BLOCKHEADER *) NULL; 
-	GFX_BLOCKHEADER *gfx_blockheader_head = (GFX_BLOCKHEADER *) NULL;
-	GFX_BLOCKHEADER *gfx_blockheader_end = (GFX_BLOCKHEADER *) NULL;
-	GFX_ENTRY *gfx_entry = (GFX_ENTRY *) NULL; 
-	GFX_ENTRY *gfx_entry_head = (GFX_ENTRY *) NULL;
-	GFX_ENTRY *gfx_entry_end  = (GFX_ENTRY *) NULL;
+	GFX_BLOCKHEADER *gfx_blockheader = NULL;
+	GFX_BLOCKHEADER *gfx_blockheader_head = NULL;
+	GFX_BLOCKHEADER *gfx_blockheader_end = NULL;
+	GFX_ENTRY *gfx_entry = NULL;
+	GFX_ENTRY *gfx_entry_head = NULL;
+	GFX_ENTRY *gfx_entry_end  = NULL;
 	unsigned char *data = NULL, *bin = NULL, *tmp = NULL, *dpathtmp = NULL;
 	char * str = NULL;
 	unsigned int str_len, data_len, size, length;	
@@ -406,9 +457,7 @@ GFX_HEADER *parse_binary(unsigned char * bp, SETTINGS settings)
 		if(!gfx_blockheader)
 		{
 			fprintf(stderr, "parse_binary: out of memory\n");
-			free_gfx_blockheader_list(gfx_blockheader_head, gfx_blockheader_end);
-			free(gfx_header);
-			return NULL;
+			goto error;
 		}
 		//read block data
 		gfx_blockheader->blocksize = READ_UINT32(bp);
@@ -419,33 +468,25 @@ GFX_HEADER *parse_binary(unsigned char * bp, SETTINGS settings)
 		
 		size = gfx_blockheader->blocksize;
 		
-		tmp = bp;
-		
-		unsigned int Count;
+		Boolean foundend = false;
 		// read device path data until devpath end node 0x0004FF7F
-		for (Count = 0;;Count++) 
+		for (tmp = bp; tmp+4 <= bpend && !foundend; tmp+=READ_UINT16(tmp+2))
 		{
-			if(Count > MAX_DEVICE_PATH_LEN)
-			{
-				// BugBug: Code to catch bogus device path
-				fprintf(stderr, "parse_binary: Cannot find device path end! Probably a bogus device path.\n");
-				free_gfx_blockheader_list(gfx_blockheader_head, gfx_blockheader_end);
-				free(gfx_blockheader);
-				free(gfx_header);
-				return NULL;
-			}				
 			if( READ_UINT32(tmp) == 0x0004ff7f || READ_UINT32(tmp) == 0x0004ffff )
-			{
-				tmp+=4;
-				break;
-			}		
-			tmp++;
+				foundend = true;
+		}
+
+		if (!foundend)
+		{
+			// BugBug: Code to catch bogus device path
+			fprintf(stderr, "parse_binary: Cannot find device path end! Probably a bogus device path.\n");
+			goto error;
 		}
 		
 		// read device path data
 		gfx_blockheader->devpath_len = (unsigned int)abs((int)(tmp-bp));
 		assert(readbin(&bp, &size, &dpathtmp,gfx_blockheader->devpath_len));
-		gfx_blockheader->devpath = (EFI_DEVICE_PATH *)dpathtmp;		
+		gfx_blockheader->devpath = (EFI_DEVICE_PATH_PROTOCOL *)dpathtmp;
 		
 		gfx_entry_head = NULL;
 		gfx_entry_end = NULL;
@@ -457,50 +498,26 @@ GFX_HEADER *parse_binary(unsigned char * bp, SETTINGS settings)
 			{
 				if(!uni2str(bin, length, &str, &str_len))
 				{
-					free(bin);
-					free_gfx_blockheader_list(gfx_blockheader_head, gfx_blockheader_end);
-					free_gfx_entry_list(gfx_entry_head, gfx_entry_end);
-					free(gfx_blockheader);
-					free(gfx_header);
-					return NULL;
+					goto error;
 				}
 			}
 			else
 			{
-				free(bin);
-				free_gfx_blockheader_list(gfx_blockheader_head, gfx_blockheader_end);
-				free_gfx_entry_list(gfx_entry_head, gfx_entry_end);
-				free(gfx_blockheader);
-				free(gfx_header);
-				return NULL;
+				goto error;
 			}
 			
 			data_len = READ_UINT32(bp);
 			data_len -= 4; bp += 4; size -=4;
 			if(!readbin(&bp, &size, &data, data_len))
 			{
-				free(str);
-				free(data);
-				free(bin);
-				free_gfx_blockheader_list(gfx_blockheader_head, gfx_blockheader_end);
-				free_gfx_entry_list(gfx_entry_head, gfx_entry_end);
-				free(gfx_blockheader);
-				free(gfx_header);
-				return NULL;
-			}	
+				goto error;
+			}
 			
 			gfx_entry = (GFX_ENTRY *)calloc(1, sizeof(GFX_ENTRY));			
 			if(!gfx_entry)
 			{
 				fprintf(stderr, "parse_binary: out of memory\n");
-				free(str);
-				free(data);
-				free(bin);
-				free_gfx_blockheader_list(gfx_blockheader_head, gfx_blockheader_end);
-				free_gfx_entry_list(gfx_entry_head, gfx_entry_end);
-				free(gfx_blockheader);
-				free(gfx_header);
-				return NULL;
+				goto error;
 			}
 			//read entries
 			gfx_entry->bkey = bin;
@@ -511,7 +528,7 @@ GFX_HEADER *parse_binary(unsigned char * bp, SETTINGS settings)
 			gfx_entry->val = data;
 			gfx_entry->val_len = data_len;
 			
-			if(settings.detect_numbers)	// detect numbers
+			if(settings->detect_numbers)	// detect numbers
 			{			
 				switch(data_len)
 				{
@@ -531,10 +548,10 @@ GFX_HEADER *parse_binary(unsigned char * bp, SETTINGS settings)
 			}
 			
 			// detect strings
-			if(settings.detect_strings && is_string(data, data_len) && gfx_entry->val_type == DATA_BINARY)
+			if(settings->detect_strings && is_string(data, data_len) && gfx_entry->val_type == DATA_BINARY)
 			{
 				gfx_entry->val_type = DATA_STRING;
-			}						
+			}
 			
 			if(!gfx_entry_head)							// if there are no nodes in list then
 				gfx_entry_head = gfx_entry;				// set head to this new node			
@@ -557,6 +574,15 @@ GFX_HEADER *parse_binary(unsigned char * bp, SETTINGS settings)
 	gfx_header->blocks = gfx_blockheader_head;
 
 	return (gfx_header);
+error:
+	free(str);
+	free(data);
+	free(bin);
+	free_gfx_blockheader_list(gfx_blockheader_head, gfx_blockheader_end);
+	free_gfx_entry_list(gfx_entry_head, gfx_entry_end);
+	free(gfx_blockheader);
+	free(gfx_header);
+	return NULL;
 }
 
 CFDictionaryRef CreateGFXDictionary(GFX_HEADER * gfx)
@@ -570,7 +596,7 @@ CFDictionaryRef CreateGFXDictionary(GFX_HEADER * gfx)
 	GFX_ENTRY *gfx_entry_tmp;	
 	uint64_t bigint;
 	char hexstr[32];
-	char *dpath;
+	CHAR16 *dpath;
 	
 	// Create dictionary that will hold gfx data
 	dict = CFDictionaryCreateMutable(kCFAllocatorDefault, 0 ,&kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
@@ -626,10 +652,11 @@ CFDictionaryRef CreateGFXDictionary(GFX_HEADER * gfx)
 			gfx_entry_tmp = gfx_entry_tmp->next;
 		}
 
-		dpath = ConvertDevicePathToText (gfx_blockheader_tmp->devpath, 1, 1);
+		VerifyDevicePathNodeSizes(gfx_blockheader_tmp->devpath);
+		dpath = PatchedConvertDevicePathToText (gfx_blockheader_tmp->devpath, 1, 1);
 		if(dpath != NULL)
 		{
-			key = CFStringCreateWithCString(kCFAllocatorDefault, dpath, kCFStringEncodingUTF8);
+			key = CFStringCreateWithCharacters(kCFAllocatorDefault, dpath, StrLen(dpath));
 		}
 		else
 		{
@@ -646,7 +673,7 @@ CFDictionaryRef CreateGFXDictionary(GFX_HEADER * gfx)
 	}
 
 	return dict;
-} 
+}
 
 GFX_HEADER *CreateGFXFromPlist(CFPropertyListRef plist)
 {
@@ -655,9 +682,10 @@ GFX_HEADER *CreateGFXFromPlist(CFPropertyListRef plist)
 	int i, IsHex;
 	unsigned int HexBytes = 0;
 	unsigned long len;
-	char *key = NULL;
 	char *HexStr = NULL;
-	unsigned char *bytes = NULL, *data = NULL;
+	unsigned char *bytes = NULL;
+	CHAR16* bytes16 = NULL;
+	unsigned char *data = NULL;
 	CFStringRef *block_keys = NULL;
 	CFTypeRef *block_vals = NULL;
 	CFStringRef *dict_keys = NULL;
@@ -703,7 +731,7 @@ GFX_HEADER *CreateGFXFromPlist(CFPropertyListRef plist)
 	gfx_blockheader_end = NULL;
 	
 	
-	for(i=0; i<num_blocks;i++)
+	for(i=0; i<num_blocks; i++)
 	{
 		this_block = (CFMutableDictionaryRef) CFDictionaryGetValue(plist,dict_keys[i]);		
 		num_rec = (int)CFDictionaryGetCount(this_block);
@@ -711,9 +739,7 @@ GFX_HEADER *CreateGFXFromPlist(CFPropertyListRef plist)
 		if(!num_rec)
 		{
 			printf("CreateGFXFromPlist: empty dictionary block found in property list\n");
-			free_gfx_blockheader_list(gfx_blockheader_head, gfx_blockheader_end);
-			free(gfx_header);
-			return NULL;			
+			goto error;
 		}
 
 		block_size=0;
@@ -728,54 +754,42 @@ GFX_HEADER *CreateGFXFromPlist(CFPropertyListRef plist)
 		gfx_blockheader->records = num_rec;
 		
 		count = CFStringGetLength(dict_keys[i]) + 1;
-		bytes = (unsigned char *)calloc( count, sizeof(unsigned char));
-		if (!bytes) 
+		CHAR16* bytes16 = calloc(count, sizeof(CHAR16));
+		if (!bytes16)
 		{
 			fprintf(stderr, "CreateGFXFromPlist: out of memory\n");
-			free(gfx_blockheader);
-			free_gfx_blockheader_list(gfx_blockheader_head, gfx_blockheader_end);
-			free(gfx_header);
-			return NULL;
-		}					
-		ret = CFStringGetBytes(dict_keys[i], CFRangeMake(0, count-1), kCFStringEncodingASCII, 0, false, bytes, count, &needed);
-		if(ret != count-1) // not ascii string
+			goto error;
+		}
+		ret = CFStringGetBytes(dict_keys[i], CFRangeMake(0, count-1), kCFStringEncodingUTF16, 0, false, (void*) bytes16, count * sizeof(CHAR16), &needed);
+		if(ret != count-1) // not utf16 string
 		{
-			fprintf(stderr, "CreateGFXFromPlist: string conversion error occured, not ascii string!\n");
-			free(gfx_blockheader);
-			free_gfx_blockheader_list(gfx_blockheader_head, gfx_blockheader_end);
-			free(gfx_header);
-			free(bytes);
-			return NULL;					
+			fprintf(stderr, "CreateGFXFromPlist: string conversion error occured, not UTF16 string!\n");
+			goto error;
 		}
 		// add at end string terminator
-		bytes[needed] = '\0';		
-		// is hex or text notation 		
-		if(isHexString(bytes,(unsigned int)(needed-1)))
-		{	
+		bytes16[ret] = '\0';
+		// is hex or text notation
+		if(isHexString16(bytes16,(unsigned int)ret))
+		{
 			// hexadecimal devicepath
-			gfx_blockheader->devpath = (EFI_DEVICE_PATH *)hex2bin((char *)bytes, &len);
-			gfx_blockheader->devpath_len = DevicePathSize (gfx_blockheader->devpath);
-			block_size+= gfx_blockheader->devpath_len; // header bytes count				
+			gfx_blockheader->devpath = (EFI_DEVICE_PATH_PROTOCOL *)hex2bin16(bytes16, &len);
 		}
-		else 
+		else
 		{
 			// try convert from text notation
-			gfx_blockheader->devpath = ConvertTextToDevicePath ((char *)bytes);
-			if(gfx_blockheader->devpath == NULL)
-			{
-				fprintf(stderr, "CreateGFXFromPlist: device path conversion error occured, not correct sytax!\n");
-				free(bytes);
-				free_gfx_blockheader_list(gfx_blockheader_head, gfx_blockheader_end);
-				free(gfx_header);
-				free(gfx_blockheader);
-				return NULL;								
-			}
-			gfx_blockheader->devpath_len = DevicePathSize (gfx_blockheader->devpath);
-			block_size+= gfx_blockheader->devpath_len; // header bytes count				
+			gfx_blockheader->devpath = ConvertTextToDevicePath (bytes16);
 		}
-		
-		free(key);
-		free(bytes);
+		free(bytes16);
+		bytes16 = NULL;
+
+		if(gfx_blockheader->devpath == NULL)
+		{
+			fprintf(stderr, "CreateGFXFromPlist: device path conversion error occured, not correct syntax!\n");
+			goto error;
+		}
+
+		gfx_blockheader->devpath_len = (unsigned int)UefiDevicePathLibGetDevicePathSize (gfx_blockheader->devpath);
+		block_size+= gfx_blockheader->devpath_len; // header bytes count				
 		
 		CFDictionaryGetKeysAndValues(this_block, (const void **)block_keys, (const void **)block_vals);
 		gfx_entry_head = NULL;
@@ -785,34 +799,27 @@ GFX_HEADER *CreateGFXFromPlist(CFPropertyListRef plist)
 			gfx_entry = (GFX_ENTRY *)calloc(1,sizeof(GFX_ENTRY));
 			count = CFStringGetLength(block_keys[num_rec]) + 1;
 				
-			bytes = (unsigned char *)calloc(count , sizeof(unsigned char));	
+			bytes = (unsigned char *)calloc(count, sizeof(unsigned char));	
 			if (!bytes) 
 			{
 				fprintf(stderr, "CreateGFXFromPlist: out of memory\n");
-				free_gfx_blockheader_list(gfx_blockheader_head, gfx_blockheader_end);
-				free_gfx_entry_list(gfx_entry_head, gfx_entry_end);
-				free(gfx_entry);
-				return NULL;
-			}					
+				goto error;
+			}
 			
 			ret = CFStringGetBytes(block_keys[num_rec], CFRangeMake(0, count-1), kCFStringEncodingASCII, 0, false, bytes, count, &needed);
 			if(ret != count-1) // not ascii string
 			{
 				fprintf(stderr, "CreateGFXFromPlist: string conversion error occured, not ascii string!\n");
-				free(bytes);
-				free_gfx_blockheader_list(gfx_blockheader_head, gfx_blockheader_end);
-				free_gfx_entry_list(gfx_entry_head, gfx_entry_end);
-				free(gfx_entry);
-				return NULL;
+				goto error;
 			}
 			// add at end string terminator
-			bytes[needed] = '\0';
+			bytes[ret] = '\0';
 			
 			gfx_entry->key = (char *)bytes;
-			gfx_entry->key_len = (unsigned int)needed;
+			gfx_entry->key_len = (unsigned int)ret;
 			
-			gfx_entry->bkey = str2uni((char *)bytes, (int)needed);
-			gfx_entry->bkey_len = unilen((char *)bytes, (int)needed);
+			gfx_entry->bkey = str2uni((char *)bytes, (int)ret);
+			gfx_entry->bkey_len = unilen((char *)bytes, (int)ret);
 			
 			block_size+=4; // key len
 			block_size+=gfx_entry->bkey_len;			
@@ -821,30 +828,21 @@ GFX_HEADER *CreateGFXFromPlist(CFPropertyListRef plist)
 			{	
 				count = CFStringGetLength(block_vals[num_rec]) + 1;
 				
-				bytes = (unsigned char *)calloc(count , sizeof(unsigned char));				
+				bytes = (unsigned char *)calloc(count, sizeof(unsigned char));				
 				if (!bytes) 
 				{
 					fprintf(stderr, "CreateGFXFromPlist: out of memory\n");
-					free_gfx_entry_list(gfx_entry_head, gfx_entry_end);
-					free(gfx_entry);
-					free(gfx_header);
-					free(gfx_blockheader);
-					return NULL;
-				}					
+					goto error;
+				}
 				
 				ret = CFStringGetBytes(block_vals[num_rec], CFRangeMake(0, count-1), kCFStringEncodingASCII, 0, false, bytes, count, &needed);
 				if(ret != count-1) // not ascii string
 				{
 					fprintf(stderr, "CreateGFXFromPlist: string conversion error occured, not ascii string!\n");
-					free(bytes);
-					free_gfx_entry_list(gfx_entry_head, gfx_entry_end);
-					free(gfx_entry);
-					free(gfx_header);
-					free(gfx_blockheader);
-					return NULL;
-				}				
+					goto error;
+				}
 				// add at end string terminator
-				bytes[needed] = '\0';
+				bytes[ret] = '\0';
 				
 				// if is 0xXX or 0xXXXX or 0xXXXXXXXX hex string
 				HexStr = TrimHexStr ((char *)bytes, &IsHex);
@@ -904,8 +902,8 @@ GFX_HEADER *CreateGFXFromPlist(CFPropertyListRef plist)
 				else
 				{
 					gfx_entry->val = bytes;
-					// Including string terminator makes sense here, as strings in IOData must end with \0, as shown in IORegExplorer.
-					gfx_entry->val_len = (unsigned int)(needed + 1);
+					// strings in device properties don't end with null so ignore the fact that strings in IORegExplorer do end with \0.
+					gfx_entry->val_len = (unsigned int)(ret);
 					gfx_entry->val_type = DATA_STRING;
 				}			
 			}
@@ -916,11 +914,7 @@ GFX_HEADER *CreateGFXFromPlist(CFPropertyListRef plist)
 				if (!bytes) 
 				{
 					fprintf(stderr, "CreateGFXFromPlist: out of memory\n");
-					free_gfx_entry_list(gfx_entry_head, gfx_entry_end);
-					free(gfx_entry);
-					free(gfx_header);
-					free(gfx_blockheader);
-					return NULL;
+					goto error;
 				}
 				
 				CFNumberGetValue(block_vals[num_rec], kCFNumberSInt64Type, &bigint);
@@ -936,11 +930,7 @@ GFX_HEADER *CreateGFXFromPlist(CFPropertyListRef plist)
 				if (!bytes) 
 				{
 					fprintf(stderr, "CreateGFXFromPlist: out of memory\n");
-					free_gfx_entry_list(gfx_entry_head, gfx_entry_end);
-					free(gfx_entry);
-					free(gfx_header);
-					free(gfx_blockheader);
-					return NULL;
+					goto error;
 				}
 				bigint = CFBooleanGetValue(block_vals[num_rec]);
 				WRITE_UINT8(bytes, bigint);
@@ -955,12 +945,8 @@ GFX_HEADER *CreateGFXFromPlist(CFPropertyListRef plist)
 				if (!bytes) 
 				{
 					fprintf(stderr, "CreateGFXFromPlist: out of memory\n");
-					free_gfx_entry_list(gfx_entry_head, gfx_entry_end);
-					free(gfx_entry);
-					free(gfx_header);
-					free(gfx_blockheader);
-					return NULL;
-				}			
+					goto error;
+				}
 				CFDataGetBytes(block_vals[num_rec], CFRangeMake(0,needed), bytes);
 				gfx_entry->val = bytes;
 				gfx_entry->val_len = (unsigned int)needed;
@@ -997,6 +983,16 @@ GFX_HEADER *CreateGFXFromPlist(CFPropertyListRef plist)
 	CFAllocatorDeallocate(NULL, dict_keys);
 	CFAllocatorDeallocate(NULL, dict_vals);
 	return gfx_header;
+	
+error:
+	free(bytes16);
+	free(bytes);
+	free_gfx_entry_list(gfx_entry_head, gfx_entry_end);
+	free(gfx_entry);
+	free(gfx_header);
+	free(gfx_blockheader);
+	free_gfx_blockheader_list(gfx_blockheader_head, gfx_blockheader_end);
+	return NULL;
 }
 
 int WritePropertyList(CFPropertyListRef propertyList, CFURLRef fileURL)
@@ -1078,184 +1074,40 @@ CFURLRef URLCreate(const char *path)
 	return NULL;
 }
 
-void getPCIParentDevicePaths(io_service_t device, io_string_t deviceName, io_string_t devicePath)
-{
-	io_string_t temp = {0};
-	kern_return_t kr;
-	io_iterator_t parentIterator;
-	
-	kr = IORegistryEntryGetParentIterator(device, kIODeviceTreePlane, &parentIterator);
-	
-	if (kr != KERN_SUCCESS)
-		return;
-	
-	for (io_service_t parentDevice; IOIteratorIsValid(parentIterator) && (parentDevice = IOIteratorNext(parentIterator)); IOObjectRelease(parentDevice))
-	{
-		if (IOObjectConformsTo(parentDevice, "IOPCIDevice"))
-		{
-			io_name_t name = {0}, locationInPlane = {0};
-			const char *deviceLocation = NULL, *functionLocation = NULL;
-			unsigned int deviceInt = 0, functionInt = 0;
-			
-			IORegistryEntryGetName(parentDevice, name);
-			kr = IORegistryEntryGetLocationInPlane(parentDevice, kIODeviceTreePlane, locationInPlane);
-			
-			if (kr == KERN_SUCCESS)
-			{
-				deviceLocation = strtok(locationInPlane, ",");
-				functionLocation = strtok(NULL, ",");
-				
-				if (deviceLocation != NULL)
-					deviceInt = (unsigned int)strtol(deviceLocation, NULL, 16);
-				
-				if (functionLocation != NULL)
-					functionInt = (unsigned int)strtol(functionLocation, NULL, 16);
-			}
-			
-			sprintf(temp, "%s.%s", name, deviceName);
-			strcpy(deviceName, temp);
-			
-			sprintf(temp, "Pci(0x%x,0x%x)/%s", deviceInt, functionInt, devicePath);
-			strcpy(devicePath, temp);
-		}
-		
-		getPCIParentDevicePaths(parentDevice, deviceName, devicePath);
-	}
-	
-	IOObjectRelease(parentIterator);
-}
-
-void getPCIRootDevicePath(io_service_t device, io_string_t deviceName, io_string_t devicePath)
-{
-	io_string_t temp = {0};
-	kern_return_t kr;
-	io_iterator_t parentIterator;
-	
-	kr = IORegistryEntryGetParentIterator(device, kIODeviceTreePlane, &parentIterator);
-	
-	if (kr != KERN_SUCCESS)
-		return;
-	
-	for (io_service_t parentDevice; IOIteratorIsValid(parentIterator) && (parentDevice = IOIteratorNext(parentIterator)); IOObjectRelease(parentDevice))
-	{
-		if (IOObjectConformsTo(parentDevice, "IOACPIPlatformDevice"))
-		{
-			io_name_t name = {0};
-			io_struct_inband_t pnp = {0}, uid = {0};
-			uint32_t size = sizeof(uid);
-			
-			IORegistryEntryGetName(parentDevice, name);
-			
-			IORegistryEntryGetProperty(parentDevice, "_UID", uid, &size);
-			
-			size = sizeof(pnp);
-			kr = IORegistryEntryGetProperty(parentDevice, "compatible", pnp, &size);
-			
-			if (kr != KERN_SUCCESS)
-			{
-				size = sizeof(pnp);
-				IORegistryEntryGetProperty(parentDevice, "name", pnp, &size);
-			}
-
-			unsigned int uidInt = (unsigned int)strtol(uid, NULL, 16);
-			unsigned int pnpId = (unsigned int)(strlen(pnp) > 3 ? strtol(pnp + 3, NULL, 16) : 0);
-			unsigned int eisaId = (strlen(pnp) > 3 ? (((pnp[0] - '@') & 0x1f) << 10) + (((pnp[1] - '@') & 0x1f) << 5) + ((pnp[2] - '@') & 0x1f) + (pnpId << 16) : 0);
-			
-			sprintf(temp, "%s.%s", name, deviceName);
-			strcpy(deviceName, temp);
-			
-			if ((eisaId & PNP_EISA_ID_MASK) == PNP_EISA_ID_CONST)
-			{
-				switch (EISA_ID_TO_NUM(eisaId))
-				{
-					case 0x0a03:
-						sprintf(temp, "PciRoot(0x%x)/%s", uidInt, devicePath);
-						break;
-					default:
-						sprintf(temp, "Acpi(PNP%04x,0x%x)/%s", EISA_ID_TO_NUM(eisaId), uidInt, devicePath);
-						break;
-				}
-			}
-			else
-				sprintf(temp, "Acpi(0x%08x,0x%x)/%s", eisaId, uidInt, devicePath);
-			
-			strcpy(devicePath, temp);
-		}
-		
-		getPCIRootDevicePath(parentDevice, deviceName, devicePath);
-	}
-	
-	IOObjectRelease(parentIterator);
-}
-
-void OutputPCIDevicePaths()
-{
-	io_iterator_t iterator;
-	
-	kern_return_t kr = IOServiceGetMatchingServices(kIOMasterPortDefault, IOServiceMatching("IOPCIDevice"), &iterator);
-	
-	if (kr != KERN_SUCCESS)
-		return;
-	
-	for (io_service_t device; IOIteratorIsValid(iterator) && (device = IOIteratorNext(iterator)); IOObjectRelease(device))
-	{
-		io_string_t devicePath = {0};
-		io_name_t deviceName = {0}, locationInPlane = {0};
-		const char *deviceLocation = NULL, *functionLocation = NULL;
-		unsigned int deviceInt = 0, functionInt = 0;
-		
-		kr = IORegistryEntryGetName(device, deviceName);
-		
-		if (kr != KERN_SUCCESS)
-			continue;
-		
-		kr = IORegistryEntryGetLocationInPlane(device, kIODeviceTreePlane, locationInPlane);
-		
-		if (kr == KERN_SUCCESS)
-		{
-			deviceLocation = strtok(locationInPlane, ",");
-			functionLocation = strtok(NULL, ",");
-			
-			if (deviceLocation != NULL)
-				deviceInt = (unsigned int)strtol(deviceLocation, NULL, 16);
-			
-			if (functionLocation != NULL)
-				functionInt = (unsigned int)strtol(functionLocation, NULL, 16);
-		}
-		
-		sprintf(devicePath, "Pci(0x%x,0x%x)", deviceInt, functionInt);
-		
-		getPCIParentDevicePaths(device, deviceName, devicePath);
-		getPCIRootDevicePath(device, deviceName, devicePath);
-		
-		printf("%s = %s\n", deviceName, devicePath);
-	}
-	
-	IOObjectRelease(iterator);
-}
-
 static void usage()
 {
 	fprintf(stdout, "\n");
 	fprintf(stdout, "GFX conversion utility version: %s. Copyright (c) 2007 McMatrix\n",VERSION);
 	fprintf(stdout, "This program comes with ABSOLUTELY NO WARRANTY.  This is free software!\n");
 	fprintf(stdout, "\n");
-	fprintf(stdout, "gfxutil: [command_option] [other_options] infile outfile\n");
+	fprintf(stdout, "gfxutil: [command_flags] [command_option] [other_options] [[infile] outfile | efidevicepath]\n");
+	fprintf(stdout, "\n");
+	fprintf(stdout, "Command flags are:\n");
+	fprintf(stdout, "-v              verbose mode\n");
+	fprintf(stdout, "-s              automatically detect string format from binary data\n");
+	fprintf(stdout, "-n              automatically detect numeric format from binary data\n");
+	fprintf(stdout, "-l              shorter text representation of the display node is used, where applicable\n");
+	fprintf(stdout, "                (shorter text representations are not reversable)\n");
+	fprintf(stdout, "-m              shortcut forms of text representation for a device node should not be used\n");
+	fprintf(stdout, "                (shortcut forms are used be some vendor messages)\n");
+	fprintf(stdout, "\n");
 	fprintf(stdout, "Command options are:\n");
-	fprintf(stdout, "[none]\t\tlist all devicepaths for PCI devices in IODeviceTree plane\n");
-	fprintf(stdout, "-f name\t\tfinds object devicepath with the given name from IODeviceTree plane\n");
-	fprintf(stdout, "-h\t\tprint this summary\n");
-	fprintf(stdout, "-a\t\tshow version\n");
-	fprintf(stdout, "-i fmt\t\tinfile type, fmt is one of (default is hex): xml bin hex\n");
-	fprintf(stdout, "-o fmt\t\toutfile type, fmt is one of (default is xml): xml bin hex\n");
-	fprintf(stdout, "-d path prop\toutput the hdd devicepath, path is the ioreg path, prop is the property\n");
-	fprintf(stdout, "\t\t(Eg. gfxutil -d IODeviceTree:/chosen boot-device-path)\n");
-	fprintf(stdout, "There are some additional optional arguments:\n");
-	fprintf(stdout, "-v\t\tverbose mode\n");
-	fprintf(stdout, "-s\t\tautomatically detect string format from binary data\n");
-	fprintf(stdout, "-n\t\tautomatically detect numeric format from binary data\n");
-	fprintf(stdout, "\n");	
+	fprintf(stdout, "[none pipe]     translate a device path to and from text\n");
+	fprintf(stdout, "-p              list all devicepaths for PCI devices in IODeviceTree plane\n");
+	fprintf(stdout, "-t              list all devicepaths for PCI and ACPI devices in IODeviceTree plane in tree order\n");
+	fprintf(stdout, "-f name         finds object devicepath with the given name from IODeviceTree plane\n");
+	fprintf(stdout, "-i fmt          infile type, fmt is one of (default is hex): xml bin hex\n");
+	fprintf(stdout, "-o fmt          outfile type, fmt is one of (default is xml): xml bin hex\n");
+	fprintf(stdout, "-d path prop    output the efi device path, path is the ioreg path, prop is the property\n");
+	fprintf(stdout, "                (Eg. gfxutil -d IODeviceTree:/chosen boot-device-path)\n");
+	fprintf(stdout, "\n");
+	fprintf(stdout, "Other command options are:\n");
+	fprintf(stdout, "-h              print this summary\n");
+	fprintf(stdout, "-a              show version\n");
+	fprintf(stdout, "\n");
 }
+
+int translate_properties (char * argv[], SETTINGS *settings);
 
 int parse_args(int argc, char * argv[], SETTINGS *settings)
 {
@@ -1264,13 +1116,6 @@ int parse_args(int argc, char * argv[], SETTINGS *settings)
 	int oflag = 0;
 	extern char *optarg;
 	extern int optind, optopt;
-	kern_return_t status = KERN_SUCCESS;
-    io_registry_entry_t service  = 0; // (needs release)	
-	const io_name_t kPlane = kIODeviceTreePlane;
-	BOOLEAN match = false;
-	EFI_DEVICE_PATH	*DevicePath = NULL;
-	io_iterator_t iterator;
-	char * devpath_text;
 	
 	// set default values
 	settings->ifile_type = FILE_HEX;
@@ -1278,106 +1123,88 @@ int parse_args(int argc, char * argv[], SETTINGS *settings)
 	settings->verbose = 0;
 	settings->detect_strings = 0;
 	settings->detect_numbers = 0;
-
-	/*********************************************************
-		gfxutil: [command_option] [other_options] infile outfile
-		Command options are:
-	    [none]			list all devicepaths for PCI devices in IODeviceTree plane
-		-f name			finds objects devicepath with the given name from IODeviceTree plane
-		-h				print this summary
-		-a				show version
-		-i fmt			infile type, fmt is one of (default is hex): xml bin hex
-		-o fmt			outfile type, fmt is one of (default is xml): xml bin hex
-		-d path prop	output the hdd devicepath, path is the ioreg path, prop is the property
-						(Eg. gfxutil -d IODeviceTree:/chosen boot-device-path)
-		There are some additional optional arguments:
-		-v				verbose mode
-		-s				automatically detect string format from binary data
-		-n				automatically detect numeric format from binary data
-	*********************************************************/
-	while((c = getopt(argc, argv, "f:dsnvahi:o:") ) != -1)
+	settings->display_only = 0;
+	settings->allow_shortcuts = 1;
+	settings->search = NULL;
+	settings->matched = false;
+	settings->plane = kIODeviceTreePlane;
+	
+	while((c = getopt(argc, argv, "vsnlmahdptf:i:o:") ) != -1)
 	{
 		switch(c)
 		{
 			case 'f':
-				// Obtain the I/O Kit root service.
-				service = IORegistryGetRootEntry(kIOMasterPortDefault);
-				assertion(service, "can't obtain I/O Kit's root service");							
-				
-				status = IORegistryEntryCreateIterator(service, kPlane, 0, &iterator);
-				assertion(status == KERN_SUCCESS, "can't obtain children");
-				
-				RecursiveFindDevicePath(iterator, optarg, kPlane, &DevicePath, &match);
-				if( (DevicePath != NULL) && match )
-				{
-					devpath_text = ConvertDevicePathToText(DevicePath, 1, 1);
-					if(devpath_text  != NULL) printf("DevicePath = %s\n",(devpath_text != NULL)?devpath_text:"???");						
-					free(devpath_text);
-					free(DevicePath);
-				}
-				else
+				settings->search = optarg;
+				settings->matched = false;
+				OutputPCIDevicePathsByTree(settings);
+				if (!settings->matched)
 				{
 					printf("DevicePath not found!\n");
+					return 1;
 				}
 				return 0;
-			break;
+				break;
 			case 'd':
-				if (argc != 4)
-					return 0;
+				if (optind + 2 != argc) {
+					usage();
+					return 1;
+				}
 				
-				io_registry_entry_t device = IORegistryEntryFromPath(kIOMasterPortDefault, argv[2]);
+				io_registry_entry_t device = IORegistryEntryFromPath(kIOMasterPortDefault, argv[optind++]);
 				
 				if (device != MACH_PORT_NULL)
 				{
 					char buffer[4096] = {0};
 					uint32_t size = sizeof(buffer);
 					
-					kern_return_t kr = IORegistryEntryGetProperty(device, argv[3], buffer, &size);
-					
+					kern_return_t kr = IORegistryEntryGetProperty(device, argv[optind], buffer, &size);
+					IOObjectRelease(device);
+
 					if (kr == KERN_SUCCESS)
 					{
-						devpath_text = ConvertHDDDevicePathToText((const EFI_DEVICE_PATH *)buffer);
-						printf("DevicePath = %s\n",(devpath_text != NULL)?devpath_text:"???");
-						free(devpath_text);
+						if (PrintDevicePathUtilToText(buffer, size, settings)) {
+							printf("Error attempting to convert device property to text!\n");
+							return 1;
+						}
 					}
 					else
 					{
 						printf("DevicePath not found!\n");
+						return 1;
 					}
-					
-					IOObjectRelease(device);
 				}
 				else
 				{
 					printf("DevicePath not found!\n");
+					return 1;
 				}
 				return 0;
 			case 'v':
 				settings->verbose = 1;
-			break;
+				break;
 			case 's':
 				settings->detect_strings = 1;
-			break;			
+				break;
 			case 'n':
 				settings->detect_numbers = 1;
-			break;	
+				break;
 			case 'a':
 				printf("%s Version: %s by McMatrix\n",argv[0],VERSION);
 				return 0;
-			break;
+				break;
 			case 'h':
 				usage();
 				return 0;
-			break;
+				break;
 			case 'i':
 				iflag++;
 				if(iflag > 1)
 				{
 					fprintf(stderr,"-i option given twice\n");
-					return 0;					
+					return 1;
 				}
 				// I only speak lower case.
-				for(i = 0;i<strlen(optarg);i++)
+				for(i = 0; i < strlen(optarg); i++)
 				{
 					optarg[i] = tolower(optarg[i]);
 				}
@@ -1397,18 +1224,18 @@ int parse_args(int argc, char * argv[], SETTINGS *settings)
 				else
 				{
 					fprintf(stderr,"Unknown infile format option: %s\n",optarg);
-					return 0;				
+					return 1;
 				}
-			break;
+				break;
 			case 'o':
 				oflag++;
 				if(oflag > 1)
 				{
 					fprintf(stderr,"-o option given twice\n");
-					return 0;					
+					return 1;
 				}			
 				// I only speak lower case.
-				for(i = 0;i<strlen(optarg);i++)
+				for(i = 0; i < strlen(optarg) ; i++)
 				{
 					optarg[i] = tolower(optarg[i]);
 				}
@@ -1428,26 +1255,67 @@ int parse_args(int argc, char * argv[], SETTINGS *settings)
 				else
 				{
 					fprintf(stderr,"Unknown outfile format option: %s\n",optarg);
-					return 0;				
+					return 1;
 				}
-			break;
+				break;
 			case '?':
 				usage();
-				return 0;
-			break;
-				
+				return 1;
+				break;
+			case 'l':
+				settings->display_only = 1;
+				break;
+			case 'm':
+				settings->allow_shortcuts = 0;
+				break;
+			case 'p':
+				return OutputPCIDevicePaths(settings);
+				break;
+			case 't':
+				return OutputPCIDevicePathsByTree(settings);
+				break;
+
 		}
 	}
 	
-	if(argc > (optind+1))
+	if (optind + 2 == argc)
 	{
-		strncpy(settings->ifile, argv[optind++], MAX_FILENAME);		
-		strncpy(settings->ofile, argv[optind++], MAX_FILENAME);		
-		return 1;
+		strncpy(settings->ifile, argv[optind++], MAX_FILENAME);
+		strncpy(settings->ofile, argv[optind++], MAX_FILENAME);
+		return translate_properties(argv, settings);
+	}
+	else if (optind + 1 == argc)
+	{
+		return parse_generic_option(argv[optind], strlen(argv[optind]), settings);
+	}
+	else if (optind == argc)
+	{
+		unsigned long argtlenmax = 10000;
+		char* argt = malloc(argtlenmax);
+		if (!argt)
+			return 1;
+		argt[0] = '\0';
+		unsigned long argtlen = 0;
+		for (;;)
+		{
+			if (argtlen == argtlenmax)
+			{
+				argtlenmax += 10000;
+				argt = realloc(argt, argtlenmax);
+				if (!argt)
+					return 1;
+			}
+			unsigned long readlen = fread(argt + argtlen, 1, argtlenmax - argtlen, stdin);
+			if (!readlen)
+				break;
+			argtlen += readlen;
+		}
+		return parse_generic_option(argt, argtlen, settings);
 	}
 	else
 	{
-		OutputPCIDevicePaths();
+		usage();
+		return 1;
 	}
 	
 	return 0;
@@ -1459,11 +1327,11 @@ long getFileSize(const char *file)
 	long filesize = 0;
 	struct stat filestat;
 
-	if(stat(file, &filestat)) 
+	if(stat(file, &filestat))
 	{
 		filesize = 0;		/* stat failed -- no such file */
 	}
-	else 
+	else
 	{
 	    if( !(filestat.st_mode & S_IFREG) )	filesize = 0;	/* not a regular file */
 	    else if( !(filestat.st_mode & S_IREAD) ) filesize = 0;	/* not readable */
@@ -1473,90 +1341,139 @@ long getFileSize(const char *file)
 	return(filesize);
 }
 
-static void indent(Boolean isNode, UInt32 serviceDepth, UInt64 stackOfBits)
+static void indent(Boolean isNode, UInt32 depth, UInt64 stackOfBits, Boolean newline)
 {
     // stackOfBits representation, given current zero-based depth is n:
     //   bit n+1             = does depth n have children?       1=yes, 0=no
     //   bit [n, .. i .., 0] = does depth i have more siblings?  1=yes, 0=no
 
-    unsigned int index;
+    char istr[129];
+	unsigned int index = 0;
+	unsigned int bar = 0;
+	unsigned int len = 0;
+	
+	for (index = 0; index < depth + 2 - isNode * 2; index++) {
+		if (stackOfBits & (1 << index)) {
+			istr[len++] = '|';
+			bar = len;
+		} else {
+			istr[len++] = ' ';
+		}
+		istr[len++] = ' ';
+	}
+	istr[newline ? bar : len] = '\0';
+	
+	printf("%s", istr);
+	if (isNode)
+		printf("+-o ");
+}
 
-    if (isNode)
-    {
-        for (index = 0; index < serviceDepth; index++)
-            printf( (stackOfBits & (1 << index)) ? "| " : "  " );
+static void setbits(UInt32 depth, UInt64 *stackOfBits, Boolean hasSiblings, Boolean hasChildren)
+{
+	// Save has-more-siblings state into stackOfBits for this depth.
 
-        printf("+-o ");
-    }
-    else // if (!isNode)
-    {
-        for (index = 0; index <= serviceDepth + 1; index++)
-            printf( (stackOfBits & (1 << index)) ? "| " : "  " );
-    }
+	if (hasSiblings)
+		*stackOfBits |= (1 << depth);
+	else
+		*stackOfBits &= ~(1 << depth);
+
+	// Save has-children state into stackOfBits for this depth.
+
+	if (hasChildren)
+		*stackOfBits |= (2 << depth);
+	else
+		*stackOfBits &= ~(2 << depth);
+
+	*stackOfBits &= ((1 << (depth + 2)) - 1);
 }
 
 void print_gfx(GFX_HEADER * gfx)
 {
-	GFX_BLOCKHEADER *gfx_blockheader_tmp;	
+	GFX_BLOCKHEADER *gfx_blockheader_tmp;
 	GFX_ENTRY *gfx_entry_tmp;
-	char *devpath_text;
-	UINT8 int8; 
-	UINT16 int16; 
-	UINT32 int32; 
-	int bit = 0;
-	int count = 0;
+	char *devpath_text = NULL;
+	CHAR16 *devpath_text16 = NULL;
+	UINT8 int8;
+	UINT16 int16;
+	UINT32 int32;
+	UInt64 stackOfBits;
+	int depth;
+	int count;
+	int i;
 	
-	printf("o device-properties <size=%d, children=%d>\n",gfx->filesize, gfx->countofblocks);	
-	
-	gfx_blockheader_tmp = gfx->blocks;
 	count = gfx->countofblocks;
-	bit = (gfx->countofblocks)?1:0;	
+
+	stackOfBits = 0;
+	depth = 0;
+	setbits(depth, &stackOfBits, 0, count > 0);
+
+	indent(true, depth, stackOfBits, false);
+	printf("device-properties <size=%d, children=%d>\n",gfx->filesize, count);
+	indent(false, depth, stackOfBits, true);
+	printf("\n");
+
+	gfx_blockheader_tmp = gfx->blocks;
 	
+	i = 0;
 	while(gfx_blockheader_tmp)
 	{
-		indent(false, 0, bit);
-		printf("\n");	
-	
-		count--;
-		bit = (count)?1:0;
+		depth++;
+		setbits(depth, &stackOfBits, i < count - 1, 0);
 				
-		indent(true, 0, bit);
-		devpath_text = ConvertDevicePathToText(gfx_blockheader_tmp->devpath, 1, 1);
-		if(devpath_text  != NULL) printf("%s <size=%d, records=%d>\n",(devpath_text != NULL)?devpath_text:"???", gfx_blockheader_tmp->blocksize, gfx_blockheader_tmp->records);
+		indent(true, depth, stackOfBits, false);
+
+		VerifyDevicePathNodeSizes(gfx_blockheader_tmp->devpath);
+		devpath_text16 = PatchedConvertDevicePathToText(gfx_blockheader_tmp->devpath, 1, 1);
+		if(devpath_text16 != NULL) {
+			devpath_text = (char *)calloc(StrLen(devpath_text16) + 1, sizeof(char));
+			if (devpath_text) {
+				UnicodeStrToAsciiStr(devpath_text16, devpath_text);
+				printf("%s <size=%d, records=%d>\n",(devpath_text != NULL)?devpath_text:"???", gfx_blockheader_tmp->blocksize, gfx_blockheader_tmp->records);
+				free(devpath_text);
+				devpath_text = NULL;
+			}
+			free(devpath_text16);
+			devpath_text16 = NULL;
+		}
 		
-		indent(false, 0, bit);
+		indent(false, depth, stackOfBits, false);
 		printf("{\n");
 		gfx_entry_tmp = gfx_blockheader_tmp->entries;
 		while(gfx_entry_tmp)
 		{
-				indent(FALSE, 1, bit);
+				indent(false, depth, stackOfBits, false);
 				switch(gfx_entry_tmp->val_type)
 				{
 					case DATA_STRING:
-						printf("\"%s\"='%s'\n",gfx_entry_tmp->key, gfx_entry_tmp->val);
+						printf("  \"%s\"='%s'\n",gfx_entry_tmp->key, gfx_entry_tmp->val);
 					break;
 					case DATA_INT8:
 						int8 = READ_UINT8(gfx_entry_tmp->val);
-						printf("\"%s\"=0x%02x\n",gfx_entry_tmp->key,int8);					
+						printf("  \"%s\"=0x%02x\n",gfx_entry_tmp->key,int8);
 					break;
 					case DATA_INT16:
 						int16 = READ_UINT16(gfx_entry_tmp->val);
-						printf("\"%s\"=0x%04x\n",gfx_entry_tmp->key,int16);				
+						printf("  \"%s\"=0x%04x\n",gfx_entry_tmp->key,int16);
 					break;
 					case DATA_INT32:
 						int32 = READ_UINT32(gfx_entry_tmp->val);
-						printf("\"%s\"=0x%08x\n",gfx_entry_tmp->key,int32);			
+						printf("  \"%s\"=0x%08x\n",gfx_entry_tmp->key,int32);
 					break;
-					default:				
+					default:
 					case DATA_BINARY:
-						printf("\"%s\"=<%s>\n",gfx_entry_tmp->key, bin2hex(gfx_entry_tmp->val,gfx_entry_tmp->val_len));			
-					break;			
-				}			
+						printf("  \"%s\"=<%s>\n",gfx_entry_tmp->key, bin2hex(gfx_entry_tmp->val,gfx_entry_tmp->val_len));
+					break;
+				}
 			gfx_entry_tmp = gfx_entry_tmp->next;
 		}
-		indent(false, 0, bit);
-		printf("}\n");				
+		indent(false, depth, stackOfBits, false);
+		printf("}\n");
+		indent(false, depth, stackOfBits, true);
+		printf("\n");
+		depth--;
+		setbits(depth, &stackOfBits, 0, count > 0);
 		gfx_blockheader_tmp = gfx_blockheader_tmp->next;
+		i++;
 	}
 }
 
@@ -1584,44 +1501,41 @@ char *file_get_contents(FILE *fp)
 
 		buf = nbuf;
 
-		strcat(buf,line);	
+		strcat(buf,line);
 	}
 	return buf;
 }
 
-int main (int argc, char * argv[]) 
+int translate_properties (char * argv[], SETTINGS *settings)
 {
-	SETTINGS settings;
-	unsigned char *binbuf, *bp, *bin;
-	char *textbuf = NULL, *hex;
-	unsigned int gfx_size;
-	GFX_HEADER * gfx;	
-	FILE * fp, *out;	
-	unsigned long filesize, len = 0;
-	CFPropertyListRef plist;
-	CFURLRef fileURL;
-   
-	if(!parse_args(argc,argv, &settings)) exit(1);
-   
+	 unsigned char *binbuf, *bp, *bin;
+	 char *textbuf = NULL, *hex;
+	 unsigned int gfx_size;
+	 GFX_HEADER * gfx;
+	 FILE * fp, *out;
+	 unsigned long filesize, len = 0;
+	 CFPropertyListRef plist;
+	 CFURLRef fileURL;
+	
 	// read input file
-	switch(settings.ifile_type)
+	switch(settings->ifile_type)
 	{
 		case FILE_HEX:
 			
 			// open ifile in text mode
-			fp = fopen(settings.ifile,"r");
+			fp = fopen(settings->ifile,"r");
 			if(fp == NULL)
 			{
-				fprintf(stderr,"%s: input file '%s' cannot be open for reading hex data\n",argv[0],settings.ifile);
-				exit(1);
-			}	
+				fprintf(stderr,"%s: input file '%s' cannot be open for reading hex data\n", argv[0], settings->ifile);
+				return(1);
+			}
 			
 			textbuf = file_get_contents(fp);
 			if(!textbuf)
 			{
-				fprintf(stderr, "%s: out of memory\n", argv[0]);
+				fprintf(stderr, "%s: out of memory\n", argv[0] );
 				fclose(fp);
-				exit(1);
+				return(1);
 			}
 			fclose(fp);
 			
@@ -1630,8 +1544,8 @@ int main (int argc, char * argv[])
 			
 			if(!bin)
 			{
-				fprintf(stderr, "%s: cannot convert from hex to bin, invalid hex inputfile '%s'!\n",argv[0],settings.ifile);
-				exit(1);
+				fprintf(stderr, "%s: cannot convert from hex to bin, invalid hex inputfile '%s'!\n",argv[0],settings->ifile);
+				return(1);
 			}
 			
 			// check if we can read filesize from binary and that if this value equals real data size
@@ -1640,38 +1554,38 @@ int main (int argc, char * argv[])
 			if( (gfx_size == len) && (gfx_size != 0) )
 			{
 				// inputfile is gfx binary
-				gfx =  parse_binary(bin, settings);
+				gfx = parse_binary(bin, bin + gfx_size, settings);
 			}
 			else
 			{
-				fprintf(stderr, "%s: invalid hex inputfile (filesize dont match or zero) '%s'!\n",argv[0],settings.ifile);
-				exit(1);			
-			}			
+				fprintf(stderr, "%s: invalid hex inputfile (filesize dont match or zero) '%s'!\n",argv[0],settings->ifile);
+				return(1);
+			}
 
 			if(!gfx)
 			{
-				fprintf(stderr, "%s: cannot parse gfx data from hex input file '%s'!\n",argv[0],settings.ifile);
-				exit(1);
+				fprintf(stderr, "%s: cannot parse gfx data from hex input file '%s'!\n",argv[0],settings->ifile);
+				return(1);
 			}
 			
 			free(textbuf);
 			free(bin);
 		break;
 		case FILE_BIN:
-			filesize = getFileSize(settings.ifile);
+			filesize = getFileSize(settings->ifile);
 
-			if(filesize <= 0) 
+			if(filesize <= 0)
 			{
-				fprintf(stderr,"%s: invalid or empty binary input file '%s'\n", argv[0],settings.ifile);
-				exit(1);
+				fprintf(stderr,"%s: invalid or empty binary input file '%s'\n", argv[0],settings->ifile);
+				return(1);
 			}
 	
-			fp = fopen(settings.ifile,"rb");
+			fp = fopen(settings->ifile,"rb");
 			if(fp == NULL)
 			{
-				fprintf(stderr,"%s: input file '%s' cannot be open for reading binary data\n",argv[0],settings.ifile);
-				exit(1);
-			}	
+				fprintf(stderr,"%s: input file '%s' cannot be open for reading binary data\n",argv[0],settings->ifile);
+				return(1);
+			}
 	
 			binbuf = (unsigned char *)calloc(filesize+2, sizeof(unsigned char));
 
@@ -1679,13 +1593,13 @@ int main (int argc, char * argv[])
 			{
 				fprintf(stderr, "%s: out of memory\n", argv[0]);
 				fclose(fp);
-				exit(1);
+				return(1);
 			}
 	
 			fread(binbuf,filesize,1,fp);
 			fclose(fp);
 	
-			bp = binbuf;		
+			bp = binbuf;
 		
 			// check if we can read filesize from binary and that if this value equals real data size
 			gfx_size = READ_UINT32(bp);
@@ -1693,38 +1607,38 @@ int main (int argc, char * argv[])
 			if( (gfx_size == filesize) && (gfx_size != 0))
 			{
 				// inputfile is gfx binary
-				gfx =  parse_binary(bp, settings);
+				gfx = parse_binary(bp, bp + gfx_size, settings);
 			}
 			else
 			{
-				fprintf(stderr, "%s: invalid binary inputfile (filesize dont match or zero) '%s'!\n",argv[0],settings.ifile);
-				exit(1);			
-			}			
+				fprintf(stderr, "%s: invalid binary inputfile (filesize dont match or zero) '%s'!\n",argv[0],settings->ifile);
+				return(1);
+			}
 
 			if(!gfx)
 			{
-				fprintf(stderr, "%s: cannot parse gfx from binary input file '%s'!\n",argv[0],settings.ifile);
-				exit(1);
+				fprintf(stderr, "%s: cannot parse gfx from binary input file '%s'!\n",argv[0],settings->ifile);
+				return(1);
 			}
-			free(binbuf);	
+			free(binbuf);
 		break;
 		case FILE_XML:
-			fileURL = URLCreate(settings.ifile);
+			fileURL = URLCreate(settings->ifile);
 			plist = ReadPropertyList(fileURL);
 			
 			if(!plist)
 			{
-				fprintf(stderr, "%s: invalid property list xml inputfile '%s'!\n",argv[0],settings.ifile);
+				fprintf(stderr, "%s: invalid property list xml inputfile '%s'!\n",argv[0],settings->ifile);
 				if (fileURL) CFRelease(fileURL);
-				exit(1);		
+				return(1);
 			}
 			
 			gfx = CreateGFXFromPlist(plist);
 			if(!gfx)
 			{
-				fprintf(stderr, "%s: cannot create gfx data from property list xml inputfile '%s'!\n",argv[0],settings.ifile);
+				fprintf(stderr, "%s: cannot create gfx data from property list xml inputfile '%s'!\n",argv[0],settings->ifile);
 				if (fileURL) CFRelease(fileURL);
-				exit(1);
+				return(1);
 			}
 
 			if(fileURL) CFRelease(fileURL);
@@ -1734,28 +1648,28 @@ int main (int argc, char * argv[])
 		default:
 			fprintf(stderr, "%s: unknown input file type\n", argv[0]);
 			fclose(fp);
-			exit(1);			
+			return(1);
 		break;
 	}
 	
-	if(settings.verbose) print_gfx(gfx);
+	if(settings->verbose) print_gfx(gfx);
 	
 	// write output file
-	switch(settings.ofile_type)
+	switch(settings->ofile_type)
 	{
 		case FILE_HEX:
-			out = fopen(settings.ofile,"w");
+			out = fopen(settings->ofile,"w");
 			if(out == NULL)
 			{
-				fprintf(stderr,"%s: file '%s' cannot be open for writing hex data\n",argv[0],settings.ofile);
-				exit(1);
+				fprintf(stderr,"%s: file '%s' cannot be open for writing hex data\n",argv[0],settings->ofile);
+				return(1);
 			}
 			
-			bin = gfx2bin(gfx);					
+			bin = gfx2bin(gfx);
 			if(!bin)
 			{
-				fprintf(stderr,"%s: file '%s' cannot write gfx data buffer for hex file\n",argv[0],settings.ofile);
-				exit(1);			
+				fprintf(stderr,"%s: file '%s' cannot write gfx data buffer for hex file\n",argv[0],settings->ofile);
+				return(1);
 			}
 			
 			hex = bin2hex(bin, gfx->filesize);
@@ -1763,54 +1677,62 @@ int main (int argc, char * argv[])
 			if(!hex)
 			{
 				fprintf(stderr,"%s: cannot create hex data from binary gfx\n",argv[0]);
-				exit(1);				
+				return(1);
 			}
 			
 			fputs(hex, out);
-			fclose(out);			
+			fclose(out);
 			free(bin);
-			free(hex);			
+			free(hex);
 		break;
 		case FILE_BIN:
-			out = fopen(settings.ofile,"wb");
+			out = fopen(settings->ofile,"wb");
 			if(out == NULL)
 			{
-				fprintf(stderr,"%s: file '%s' cannot be open for writing binary data\n",argv[0],settings.ofile);
-				exit(1);
+				fprintf(stderr,"%s: file '%s' cannot be open for writing binary data\n",argv[0],settings->ofile);
+				return(1);
 			}
 
 			bin = gfx2bin(gfx);
 			if(!bin)
 			{
-				fprintf(stderr,"%s: file '%s' cannot write gfx data buffer for binary file\n",argv[0],settings.ofile);
-				exit(1);			
+				fprintf(stderr,"%s: file '%s' cannot write gfx data buffer for binary file\n",argv[0],settings->ofile);
+				return(1);
 			}
 			
 			fwrite(bin, 1,gfx->filesize, out);
-			fclose(out);			
-			free(bin);		
+			fclose(out);
+			free(bin);
 		break;
 		case FILE_XML:
 			plist = CreateGFXDictionary(gfx);
 			if(!plist)
 			{
 				fprintf(stderr, "%s: cannot build property list from gfx data!\n",argv[0]);
-				exit(1);				
+				return(1);
 			}
 	
-			fileURL =  URLCreate(settings.ofile);
+			fileURL = URLCreate(settings->ofile);
 	
 			if(!WritePropertyList(plist,fileURL))
 			{
-				fprintf(stderr, "%s: file '%s' cannot be open for writing property list data\n",argv[0], settings.ofile);
+				fprintf(stderr, "%s: file '%s' cannot be open for writing property list data\n",argv[0], settings->ofile);
 				if (fileURL) CFRelease(fileURL);
-				exit(1);			
+				return(1);
 			}
 			if (fileURL) CFRelease(fileURL);
-			CFRelease(plist);		
+			CFRelease(plist);
 		break;
 	}
 	
 	free(gfx);
 	return 0;
+}
+
+
+int main (int argc, char * argv[])
+{
+	UefiBootServicesTableLibConstructor();
+	SETTINGS settings;
+	exit(parse_args(argc,argv, &settings));
 }

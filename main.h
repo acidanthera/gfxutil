@@ -7,12 +7,14 @@
  *
  */
 
+#ifndef _MAIN_H
+#define _MAIN_H
+
+#include "UefiDevicePathLib.h"
+
 // Constants
 #define MAX_FILENAME 255
 #define VERSION "1.79b"
-
-const unsigned char _HexTabLC[16]= "0123456789abcdef";
-const unsigned char _HexTabUC[16]= "0123456789ABCDEF";
 
 typedef enum FILE_TYPES
 {
@@ -41,6 +43,11 @@ typedef struct SETTINGS
 	int verbose;				// verbose mode
 	int detect_strings;			// detect strings from binary data
 	int detect_numbers;			// detect numberic data from binary
+	int display_only;			// shorter text representation of the display node is used, where applicable (default false)
+	int allow_shortcuts;		// shortcut forms of text representation for a device node should be used (default true)
+	char* search;               // string to search for while traversing ioreg tree
+	BOOLEAN matched;            // string was found
+	char* plane;                // ioreg plane to search
 } SETTINGS;
 
 // gfx main header
@@ -75,3 +82,5 @@ typedef struct GFX_ENTRY
 	DATA_TYPES val_type;	// binary data type
 	struct GFX_ENTRY * next;	
 } GFX_ENTRY;
+
+#endif

@@ -1,21 +1,7 @@
 #ifndef _UTILS_H
 #define _UTILS_H
 
-/*
- * Define the 8-bit and 16-bit numeric types.
- */
-typedef signed char			INT8;
-typedef unsigned char		UINT8;
-typedef INT8 				BOOLEAN;
-typedef char				CHAR8;
-typedef short				INT16;
-typedef unsigned short		UINT16;
-typedef int					INT32;
-typedef unsigned int		UINT32;
-typedef long				INT64;
-typedef unsigned long		UINT64;
-typedef	float				FLOAT;
-typedef	double				DOUBLE;
+#include "UefiDevicePathLib.h"
 
 /*
  * alpha    = lowalpha | upalpha
@@ -55,6 +41,8 @@ typedef	double				DOUBLE;
  */
 #define IS_HEX(x) ((IS_DIGIT(x)) || (((unsigned char)(x) >= 'a') && ((unsigned char)(x) <= 'f')) || \
 	    (((unsigned char)(x) >= 'A') && ((unsigned char)(x) <= 'F')))
+
+#define IS_LOWER_HEX(x) ((IS_DIGIT(x)) || (((unsigned char)(x) >= 'a') && ((unsigned char)(x) <= 'f')))
 
 /*
  * mark = "-" | "_" | "." | "!" | "~" | "*" | "'" | "(" | ")" | ";" | "/" | "?" | ":" | "@" | "&" | "=" | "+" | "$" | "," |
@@ -196,8 +184,4 @@ int HexStringToBuf (unsigned char *Buf, unsigned int *Len, char *Str, unsigned i
 // Determines if a Unicode character is a hexadecimal digit.
 int IsHexDigit (unsigned char *Digit, char Char);
 
-void CatPrintf(char *target, const char *format, ...);
-
-
-void *MallocCopy(unsigned int newSize, unsigned int size, void *buf);
 #endif

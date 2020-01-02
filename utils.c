@@ -456,35 +456,6 @@ void Dtoi64 (char *str,unsigned long *Data)
   *Data = u;
 }
 
-// Convert integer string to uint.
-unsigned int Strtoi (char *Str, unsigned int *Bytes)
-{
-  int IsHex;
-
-  Str = TrimHexStr (Str, &IsHex);
-
-  if (IsHex) 
-  {
-    return Xtoi (Str, Bytes);
-  } else {
-    return Dtoi (Str);
-  }
-}
-
-//  Convert integer string to 64 bit data.
-void Strtoi64 (char *Str, unsigned long *Data, unsigned int *Bytes)
-{
-  int IsHex;
-
-  Str = TrimHexStr (Str, &IsHex);
-
-  if (IsHex) {
-    Xtoi64 (Str, Data, Bytes);
-  } else {
-    Dtoi64 (Str, Data);
-  }
-}
-
 int StrToBuf (unsigned char *Buf, unsigned int BufferLength, char *Str)
 {
   unsigned int  Index;
@@ -600,27 +571,3 @@ int IsHexDigit (unsigned char *Digit, char Char)
 
   return 0;
 }
-
-void CatPrintf(char *target, const char *format, ...)
-{
-	va_list varargs;
-	
-	while(*target) target++;
-	
-	va_start(varargs, format);
-	vsprintf(target, format, varargs);
-	va_end(varargs);
-}
-
-void *MallocCopy(unsigned int newSize, unsigned int size, void *buf)
-{
-	void *new = NULL;
-	
-	if( (new = (void *)calloc(newSize, sizeof(unsigned char)) ) != NULL)
-	{
-		memcpy(new, buf, size);
-	}
-	
-	return new;
-}
-
