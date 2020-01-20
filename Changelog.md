@@ -1,6 +1,6 @@
 gfxutil changelog
 =================
-#### 1.79b joevt Dec 24, 2019
+#### 1.80b
 - Replaced efidevp.h, efidevp.c according to the following changes:
 - Added edk2 for efi stuff. It is used for all device path conversions to and from text.
   Therefore all node types can be converted, not just PCI and ACPI.

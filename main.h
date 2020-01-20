@@ -14,7 +14,7 @@
 
 // Constants
 #define MAX_FILENAME 255
-#define VERSION "1.79b"
+#define VERSION "1.80b"
 
 typedef enum FILE_TYPES
 {
@@ -67,7 +67,7 @@ typedef struct GFX_BLOCKHEADER
 	EFI_DEVICE_PATH *devpath;		// device address binary
 	unsigned int devpath_len;		// device address binary len	
 	struct GFX_ENTRY * entries;		// pointer to block entries
-	struct GFX_BLOCKHEADER * next;	// pointer to next datablock	 
+	struct GFX_BLOCKHEADER * next;	// pointer to next datablock
 } GFX_BLOCKHEADER;
 
 // gfx data entries

@@ -17,7 +17,7 @@
 #include <sys/types.h>
 #include <CoreFoundation/CoreFoundation.h>            // (CFDictionary, ...)
 #include <IOKit/IOCFSerialize.h>                      // (IOCFSerialize, ...)
-#include <IOKit/IOKitLib.h>							  // (IOMasterPort, ...)
+#include <IOKit/IOKitLib.h>                           // (IOMasterPort, ...)
 #include "edk2misc.h"
 #include "efidevp.h"
 #include "utils.h"
@@ -162,16 +162,16 @@ static int uni2str(unsigned char *d, unsigned int length, char **str, unsigned i
 unsigned char _nibbleValue(CHAR16 hexchar)
 {
 	unsigned char val;
-    
+	
 	if(hexchar >= '0' && hexchar <= '9')
 		val = hexchar - '0';
-    else if(hexchar >= 'A' && hexchar <= 'F')
+	else if(hexchar >= 'A' && hexchar <= 'F')
 		val = hexchar - 'A' + 10;
-    else if(hexchar >= 'a' && hexchar <= 'f')
+	else if(hexchar >= 'a' && hexchar <= 'f')
 		val = hexchar - 'a' + 10;
-    else
+	else
 		val = 0xff;
-    return(val);
+	return(val);
 	
 }
 
@@ -202,7 +202,7 @@ char *bin2hex(const unsigned char *data, unsigned long size)
 	{
 		fprintf(stderr, "bin2hex: out of memory\n");
 		return 0;
-	}    
+	}
 	
 	for(i=0; i < size; i++) 
 	{
@@ -210,8 +210,8 @@ char *bin2hex(const unsigned char *data, unsigned long size)
 		*p++ = _HexTabLC[c >> 4];
 		*p++ = _HexTabLC[c & 0xf];
 	}
-    *p = '\0';
-    return(pout);
+	*p = '\0';
+	return(pout);
 }
 
 /* After the call, length will contain the byte length of binary data. */
@@ -253,13 +253,13 @@ unsigned char *hex2bin(const char *data, unsigned long *size)
 		else 
 		{
 			*p++ |= ch;
-    	    HighNibble = 1;
+			HighNibble = 1;
 			bcount++;
 		}
 	}
 	
-    *size = bcount;	/* byte count */
-    return(pout);
+	*size = bcount;	/* byte count */
+	return(pout);
 }
 
 /* After the call, length will contain the byte length of binary data. */
@@ -301,13 +301,13 @@ unsigned char *hex2bin16(CHAR16 *data, unsigned long *size)
 		else 
 		{
 			*p++ |= ch;
-    	    HighNibble = 1;
+			HighNibble = 1;
 			bcount++;
 		}
 	}
 	
-    *size = bcount;	/* byte count */
-    return(pout);
+	*size = bcount;	/* byte count */
+	return(pout);
 }
 
 int is_string(void * buffer, int size)
@@ -424,7 +424,7 @@ GFX_HEADER *parse_binary(unsigned char * bp, unsigned char * bpend, SETTINGS *se
 	GFX_BLOCKHEADER *gfx_blockheader_end = NULL;
 	GFX_ENTRY *gfx_entry = NULL;
 	GFX_ENTRY *gfx_entry_head = NULL;
-	GFX_ENTRY *gfx_entry_end  = NULL;
+	GFX_ENTRY *gfx_entry_end = NULL;
 	unsigned char *data = NULL, *bin = NULL, *tmp = NULL, *dpathtmp = NULL;
 	char * str = NULL;
 	unsigned int str_len, data_len, size, length;	
@@ -698,7 +698,7 @@ GFX_HEADER *CreateGFXFromPlist(CFPropertyListRef plist)
 	GFX_BLOCKHEADER *gfx_blockheader_end = (GFX_BLOCKHEADER *) NULL;
 	GFX_ENTRY *gfx_entry = (GFX_ENTRY *) NULL; 
 	GFX_ENTRY *gfx_entry_head = (GFX_ENTRY *) NULL;
-	GFX_ENTRY *gfx_entry_end  = (GFX_ENTRY *) NULL;
+	GFX_ENTRY *gfx_entry_end = (GFX_ENTRY *) NULL;
 	CFIndex ret, count;
 	CFIndex needed;	
 	uint64_t bigint;
@@ -744,7 +744,7 @@ GFX_HEADER *CreateGFXFromPlist(CFPropertyListRef plist)
 
 		block_size=0;
 		block_size+=4; // size record itself
-		block_size+=4; // entries count record  		
+		block_size+=4; // entries count record		
 
 		block_keys = CFAllocatorAllocate(NULL, num_rec * sizeof(CFStringRef), 0);
 		block_vals = CFAllocatorAllocate(NULL, num_rec * sizeof(CFTypeRef), 0);
@@ -1078,7 +1078,7 @@ static void usage()
 {
 	fprintf(stdout, "\n");
 	fprintf(stdout, "GFX conversion utility version: %s. Copyright (c) 2007 McMatrix\n",VERSION);
-	fprintf(stdout, "This program comes with ABSOLUTELY NO WARRANTY.  This is free software!\n");
+	fprintf(stdout, "This program comes with ABSOLUTELY NO WARRANTY. This is free software!\n");
 	fprintf(stdout, "\n");
 	fprintf(stdout, "gfxutil: [command_flags] [command_option] [other_options] [[infile] outfile | efidevicepath]\n");
 	fprintf(stdout, "\n");
@@ -1333,9 +1333,9 @@ long getFileSize(const char *file)
 	}
 	else
 	{
-	    if( !(filestat.st_mode & S_IFREG) )	filesize = 0;	/* not a regular file */
-	    else if( !(filestat.st_mode & S_IREAD) ) filesize = 0;	/* not readable */
-	    else filesize = (long)filestat.st_size;
+		if( !(filestat.st_mode & S_IFREG) )	filesize = 0;	/* not a regular file */
+		else if( !(filestat.st_mode & S_IREAD) ) filesize = 0;	/* not readable */
+		else filesize = (long)filestat.st_size;
 	}
 	
 	return(filesize);
@@ -1343,11 +1343,11 @@ long getFileSize(const char *file)
 
 static void indent(Boolean isNode, UInt32 depth, UInt64 stackOfBits, Boolean newline)
 {
-    // stackOfBits representation, given current zero-based depth is n:
-    //   bit n+1             = does depth n have children?       1=yes, 0=no
-    //   bit [n, .. i .., 0] = does depth i have more siblings?  1=yes, 0=no
+	// stackOfBits representation, given current zero-based depth is n:
+	//   bit n+1             = does depth n have children?       1=yes, 0=no
+	//   bit [n, .. i .., 0] = does depth i have more siblings?  1=yes, 0=no
 
-    char istr[129];
+	char istr[129];
 	unsigned int index = 0;
 	unsigned int bar = 0;
 	unsigned int len = 0;
@@ -1508,14 +1508,14 @@ char *file_get_contents(FILE *fp)
 
 int translate_properties (char * argv[], SETTINGS *settings)
 {
-	 unsigned char *binbuf, *bp, *bin;
-	 char *textbuf = NULL, *hex;
-	 unsigned int gfx_size;
-	 GFX_HEADER * gfx;
-	 FILE * fp, *out;
-	 unsigned long filesize, len = 0;
-	 CFPropertyListRef plist;
-	 CFURLRef fileURL;
+	unsigned char *binbuf, *bp, *bin;
+	char *textbuf = NULL, *hex;
+	unsigned int gfx_size;
+	GFX_HEADER * gfx;
+	FILE * fp, *out;
+	unsigned long filesize, len = 0;
+	CFPropertyListRef plist;
+	CFURLRef fileURL;
 	
 	// read input file
 	switch(settings->ifile_type)

@@ -30,7 +30,7 @@ int allhex(char *arg, unsigned long len)
 
 int PrintDevicePathUtilToText(void* bytepath, unsigned long bytepathlen, SETTINGS *settings)
 {
-    int result = 0;
+	int result = 0;
 	if (settings->verbose)
 	{
 		fprintf(stdout, "# Converting %ld bytes to text\n", bytepathlen);
@@ -38,75 +38,75 @@ int PrintDevicePathUtilToText(void* bytepath, unsigned long bytepathlen, SETTING
 	
 	VerifyDevicePathNodeSizes(bytepath);
 	CHAR16* textpath = PatchedConvertDevicePathToText(bytepath, settings->display_only, settings->allow_shortcuts);
-    
-    if (textpath)
-    {
-        UINTN textlen = StrLen(textpath);
+	
+	if (textpath)
+	{
+		UINTN textlen = StrLen(textpath);
 
 		if (settings->verbose)
-        {
-            fprintf(stdout, "# Text path %llu\n", textlen);
-        }
+		{
+			fprintf(stdout, "# Text path %llu\n", textlen);
+		}
 
-        CHAR8* asciitextpath = AllocatePool(textlen + 1);
-        if (asciitextpath)
-        {
-            UnicodeStrToAsciiStr(textpath, asciitextpath);
-            fprintf(stdout, "%s\n", asciitextpath);
-            FreePool(asciitextpath);
-        }
-        else
-        {
-            result = 1;
-        }
-        FreePool(textpath);
-    }
-    else
-    {
-        result = 1;
-    }
-    return result;
+		CHAR8* asciitextpath = AllocatePool(textlen + 1);
+		if (asciitextpath)
+		{
+			UnicodeStrToAsciiStr(textpath, asciitextpath);
+			fprintf(stdout, "%s\n", asciitextpath);
+			FreePool(asciitextpath);
+		}
+		else
+		{
+			result = 1;
+		}
+		FreePool(textpath);
+	}
+	else
+	{
+		result = 1;
+	}
+	return result;
 }
 
 
 int OutputDevicePathUtilFromText(void* asciitextpath, unsigned long asciitextpathlen, SETTINGS *settings)
 {
-    int result = 0;
-    if (settings->verbose)
-    {
-        fprintf(stdout, "# Converting %ld characters to bytes\n", asciitextpathlen);
-    }
-    
-    CHAR16* textpath = AllocatePool((asciitextpathlen + 1) * sizeof (CHAR16));
-    if (textpath)
-    {
-        AsciiStrToUnicodeStr(asciitextpath, textpath);
-        EFI_DEVICE_PATH_PROTOCOL *bytepath = ConvertTextToDevicePath(textpath);
-        if (bytepath)
-        {
-            int bytepathlen = 0;
-            for (EFI_DEVICE_PATH_PROTOCOL *node = bytepath;;)
-            {
-                int nodelen = node->Length[0] | node->Length[1] << 8;
-                bytepathlen += nodelen;
-                if (node->Type == END_DEVICE_PATH_TYPE && node->SubType == END_ENTIRE_DEVICE_PATH_SUBTYPE) break;
-                node = (EFI_DEVICE_PATH_PROTOCOL *)((UINT8*)node + nodelen);
-            }
-            PrintMem (bytepath, bytepathlen);
-            putchar('\n');
-        }
-        else
-        {
-            result = 1;
-        }
-        FreePool(textpath);
-    }
-    else
-    {
-        result = 1;
-    }
+	int result = 0;
+	if (settings->verbose)
+	{
+		fprintf(stdout, "# Converting %ld characters to bytes\n", asciitextpathlen);
+	}
+	
+	CHAR16* textpath = AllocatePool((asciitextpathlen + 1) * sizeof (CHAR16));
+	if (textpath)
+	{
+		AsciiStrToUnicodeStr(asciitextpath, textpath);
+		EFI_DEVICE_PATH_PROTOCOL *bytepath = ConvertTextToDevicePath(textpath);
+		if (bytepath)
+		{
+			int bytepathlen = 0;
+			for (EFI_DEVICE_PATH_PROTOCOL *node = bytepath;;)
+			{
+				int nodelen = node->Length[0] | node->Length[1] << 8;
+				bytepathlen += nodelen;
+				if (node->Type == END_DEVICE_PATH_TYPE && node->SubType == END_ENTIRE_DEVICE_PATH_SUBTYPE) break;
+				node = (EFI_DEVICE_PATH_PROTOCOL *)((UINT8*)node + nodelen);
+			}
+			PrintMem (bytepath, bytepathlen);
+			putchar('\n');
+		}
+		else
+		{
+			result = 1;
+		}
+		FreePool(textpath);
+	}
+	else
+	{
+		result = 1;
+	}
 
-    return result;
+	return result;
 }
 
 
@@ -131,8 +131,8 @@ int parse_generic_option(char *arg, unsigned long arglen, SETTINGS *settings)
 
 	if (arg[0] == '%')
 	{
-        // convert hex "nvram -p" path
-        for (i = 0; i < arglen;)
+		// convert hex "nvram -p" path
+		for (i = 0; i < arglen;)
 		{
 			if (bytepathlen == bytepathlenmax)
 			{
@@ -143,7 +143,7 @@ int parse_generic_option(char *arg, unsigned long arglen, SETTINGS *settings)
 			}
 			if (arg[i] == '%' && i+2 < arglen && IS_LOWER_HEX(arg[i+1]) && IS_LOWER_HEX(arg[i+2]))
 			{
-                i++;
+				i++;
 				bytepath[bytepathlen++] = hextobyte(arg + i);
 				i += 2;
 			}
@@ -156,23 +156,23 @@ int parse_generic_option(char *arg, unsigned long arglen, SETTINGS *settings)
 	}
 	else if ((arglen & 1) == 0 && allhex(arg, arglen))
 	{
-        // convert hex "xxd -p" path
+		// convert hex "xxd -p" path
 		for (i = 0; i < arglen; i += 2)
 		{
-            if (bytepathlen == bytepathlenmax)
-            {
-                bytepathlenmax += 10000;
-                bytepath = realloc(bytepath, bytepathlenmax);
-                if (!bytepath)
-                    return 1;
-            }
+			if (bytepathlen == bytepathlenmax)
+			{
+				bytepathlenmax += 10000;
+				bytepath = realloc(bytepath, bytepathlenmax);
+				if (!bytepath)
+					return 1;
+			}
 			bytepath[bytepathlen++] = hextobyte(arg + i);
 		}
 		return PrintDevicePathUtilToText(bytepath, bytepathlen, settings);
 	}
 	else if (!isprint(arg[0]))
 	{
-        // convert binary path
+		// convert binary path
 		return PrintDevicePathUtilToText(arg, arglen, settings);
 	}
 	else
@@ -386,7 +386,7 @@ int OutputPCIDevicePathsByTree1(io_service_t serviceNext, io_iterator_t services
 		io_iterator_t children;
 		io_registry_entry_t	child;
 		kern_return_t status;
-        serviceNext = IOIteratorNext(services);
+		serviceNext = IOIteratorNext(services);
 		status = IORegistryEntryGetChildIterator(service, settings->plane, &children);
 		child = IOIteratorNext(children);
 		OutputOneDevice(service, settings);

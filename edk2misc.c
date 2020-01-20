@@ -6,13 +6,7 @@
 //
 
 #include "edk2misc.h"
-
-//#include <stdio.h>
-
-// #undef __pic__
-
 #include "UefiDevicePathLib.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -27,9 +21,9 @@ EFI_SYSTEM_TABLE *gST = NULL;
 EFI_BOOT_SERVICES *gBS = NULL;
 
 #define EFI_UART_DEVICE_PATH_GUID \
-  { \
-    0x37499a9d, 0x542f, 0x4c89, {0xa0, 0x26, 0x35, 0xda, 0x14, 0x20, 0x94, 0xe4 } \
-  }
+{ \
+	0x37499a9d, 0x542f, 0x4c89, {0xa0, 0x26, 0x35, 0xda, 0x14, 0x20, 0x94, 0xe4 } \
+}
 
 
 EFI_GUID gEfiDebugPortProtocolGuid = EFI_DEBUGPORT_PROTOCOL_GUID;
@@ -49,40 +43,39 @@ EFI_GUID gEfiDevicePathProtocolGuid = EFI_DEVICE_PATH_PROTOCOL_GUID;
 
 VOID *
 InternalAllocateCopyPool (
-   UINTN            AllocationSize,
-   CONST VOID       *Buffer
-  )
+	UINTN AllocationSize,
+	CONST VOID *Buffer
+	)
 {
-  VOID  *Memory;
+	VOID  *Memory;
 
-  ASSERT (Buffer != NULL);
-//  ASSERT (AllocationSize <= (MAX_ADDRESS - (UINTN) Buffer + 1));
+	ASSERT (Buffer != NULL);
 
-  Memory = malloc (AllocationSize);
-  if (Memory != NULL) {
-     Memory = memcpy (Memory, Buffer, AllocationSize);
-  }
-  return Memory;
+	Memory = malloc (AllocationSize);
+	if (Memory != NULL) {
+		Memory = memcpy (Memory, Buffer, AllocationSize);
+	}
+	return Memory;
 }
 
 
 VOID *
 AllocateCopyPool (
-   UINTN       AllocationSize,
-   CONST VOID  *Buffer
-  )
+	UINTN AllocationSize,
+	CONST VOID *Buffer
+	)
 {
-  return InternalAllocateCopyPool (AllocationSize, Buffer);
+	return InternalAllocateCopyPool (AllocationSize, Buffer);
 }
 
 
 EFI_STATUS
 EFIAPI
 DontHandleProtocol (
-  IN EFI_HANDLE       UserHandle,
-  IN EFI_GUID         *Protocol,
-  OUT VOID            **Interface
-  )
+	IN EFI_HANDLE UserHandle,
+	IN EFI_GUID *Protocol,
+	OUT VOID **Interface
+	)
 {
 	return EFI_UNSUPPORTED;
 }
@@ -90,72 +83,72 @@ DontHandleProtocol (
 
 VOID
 PrintMem (
-          CONST VOID *Buffer,
-          UINTN      Count
-          )
+	CONST VOID *Buffer,
+	UINTN Count
+	)
 {
-    CONST UINT8 *Bytes;
-    UINTN       Idx;
-    
-    Bytes = Buffer;
-    for (Idx = 0; Idx < Count; Idx++) {
-        printf("%02x", Bytes[Idx]);
-    }
+	CONST UINT8 *Bytes;
+	UINTN Idx;
+
+	Bytes = Buffer;
+	for (Idx = 0; Idx < Count; Idx++) {
+		printf("%02x", Bytes[Idx]);
+	}
 }
 
 CHAR16 *
 EFIAPI
 UefiDevicePathLibCatPrint (
-  IN OUT POOL_PRINT   *Str,
-  IN CHAR16           *Fmt,
-  ...
+	IN OUT POOL_PRINT *Str,
+	IN CHAR16 *Fmt,
+	...
 );
 
 CHAR16 *
 UefiDevicePathLibStrDuplicate (
-  IN CONST CHAR16  *Src
-  );
+	IN CONST CHAR16 *Src
+	);
 
 CHAR16 *
 GetNextParamStr (
-  IN OUT CHAR16 **List
- );
+	IN OUT CHAR16 **List
+	);
 
 VOID
 Strtoi64 (
-  IN  CHAR16  *Str,
-  OUT UINT64  *Data
-  );
+	IN CHAR16 *Str,
+	OUT UINT64 *Data
+	);
 
 UINTN
 Strtoi (
-  IN CHAR16  *Str
-  );
+	IN CHAR16 *Str
+	);
 
 typedef struct {
-  EFI_DEVICE_PATH_PROTOCOL        Header;
-  UINT8                           SasAddress[4]; // reduced from 8 to 4 bytes
-  UINT8                           Lun[4]; // reduced from 8 to 4 bytes
-  UINT16                          DeviceTopology;
-  UINT16                          RelativeTargetPort;
+	EFI_DEVICE_PATH_PROTOCOL Header;
+	UINT8 SasAddress[4]; // reduced from 8 to 4 bytes
+	UINT8 Lun[4]; // reduced from 8 to 4 bytes
+	UINT16 DeviceTopology;
+	UINT16 RelativeTargetPort;
 } PATCHED_SASEX_DEVICE_PATH;
 
 
 VOID
 DevPathToTextSasEx (
-  IN OUT POOL_PRINT  *Str,
-  IN VOID            *DevPath,
-  IN BOOLEAN         DisplayOnly,
-  IN BOOLEAN         AllowShortcuts
-  );
+	IN OUT POOL_PRINT *Str,
+	IN VOID *DevPath,
+	IN BOOLEAN DisplayOnly,
+	IN BOOLEAN AllowShortcuts
+	);
 
 VOID
 PatchedDevPathToTextSasEx (
-  IN OUT POOL_PRINT  *Str,
-  IN VOID            *DevPath,
-  IN BOOLEAN         DisplayOnly,
-  IN BOOLEAN         AllowShortcuts
-  )
+	IN OUT POOL_PRINT *Str,
+	IN VOID *DevPath,
+	IN BOOLEAN DisplayOnly,
+	IN BOOLEAN AllowShortcuts
+	)
 {
 	if (DevicePathNodeLength(DevPath) == sizeof(SASEX_DEVICE_PATH)) {
 		DevPathToTextSasEx(Str, DevPath, DisplayOnly, AllowShortcuts);
@@ -164,10 +157,10 @@ PatchedDevPathToTextSasEx (
 	
 	PATCHED_SASEX_DEVICE_PATH *SasEx;
 	UINTN Index;
-  
+	
 	SasEx = DevPath;
 	UefiDevicePathLibCatPrint (Str, L"SasEx(0x");
-  
+	
 	for (Index = 0; Index < sizeof (SasEx->SasAddress) / sizeof (SasEx->SasAddress[0]); Index++) {
 		UefiDevicePathLibCatPrint (Str, L"%02x", SasEx->SasAddress[Index]);
 	}
@@ -205,13 +198,13 @@ PatchedDevPathToTextSasEx (
 
 EFI_DEVICE_PATH_PROTOCOL *
 DevPathFromTextSasEx (
-  IN CHAR16 *TextDeviceNode
-  );
+	IN CHAR16 *TextDeviceNode
+	);
 
 EFI_DEVICE_PATH_PROTOCOL *
 PatchedDevPathFromTextSasEx (
-  IN CHAR16 *TextDeviceNode
-  )
+	IN CHAR16 *TextDeviceNode
+	)
 {
 	CHAR16 *AddressStr;
 	CHAR16 *LunStr;
@@ -257,32 +250,31 @@ PatchedDevPathFromTextSasEx (
 
 VOID
 DevPathToTextNodeGeneric (
-  IN OUT POOL_PRINT  *Str,
-  IN VOID            *DevPath,
-  IN BOOLEAN         DisplayOnly,
-  IN BOOLEAN         AllowShortcuts
+	IN OUT POOL_PRINT *Str,
+	IN VOID *DevPath,
+	IN BOOLEAN DisplayOnly,
+	IN BOOLEAN AllowShortcuts
 );
 
 VOID
 DevPathToTextEndInstance (
-  IN OUT POOL_PRINT  *Str,
-  IN VOID            *DevPath,
-  IN BOOLEAN         DisplayOnly,
-  IN BOOLEAN         AllowShortcuts
+	IN OUT POOL_PRINT *Str,
+	IN VOID *DevPath,
+	IN BOOLEAN DisplayOnly,
+	IN BOOLEAN AllowShortcuts
 );
 
 
 #define psize(x) sizeof(((EFI_DEV_PATH *)0)->x)
 
 typedef struct {
-	UINT8                Type;
-	UINT8                SubType;
-	int                  SizeMin;
-	int                  SizeMax; // 0 = same as min, 1 = infinite
-	int                  SizeInc;
+	UINT8 Type;
+	UINT8 SubType;
+	int SizeMin;
+	int SizeMax; // 0 = same as min, 1 = infinite
+	int SizeInc;
 } DEVICE_NODE_TO_SIZE;
 
-//const int x = sizeof(DEVICE_NODE_TO_SIZE.SizeMin);
 
 const DEVICE_NODE_TO_SIZE NodeSize[] = {
 	{HARDWARE_DEVICE_PATH  , HW_PCI_DP                        , psize(Pci)                       , 0, 0 },
@@ -399,69 +391,68 @@ extern const DEVICE_PATH_TO_TEXT_TABLE mUefiDevicePathLibToTextTable[];
 CHAR16 *
 EFIAPI
 PatchedConvertDevicePathToText (
-  IN CONST EFI_DEVICE_PATH_PROTOCOL   *DevicePath,
-  IN BOOLEAN                          DisplayOnly,
-  IN BOOLEAN                          AllowShortcuts
-  )
+	IN CONST EFI_DEVICE_PATH_PROTOCOL *DevicePath,
+	IN BOOLEAN DisplayOnly,
+	IN BOOLEAN AllowShortcuts
+	)
 {
-  POOL_PRINT               Str;
-  EFI_DEVICE_PATH_PROTOCOL *Node;
-  EFI_DEVICE_PATH_PROTOCOL *AlignedNode;
-  UINTN                    Index;
-  DEVICE_PATH_TO_TEXT      ToText;
+	POOL_PRINT Str;
+	EFI_DEVICE_PATH_PROTOCOL *Node;
+	EFI_DEVICE_PATH_PROTOCOL *AlignedNode;
+	UINTN Index;
+	DEVICE_PATH_TO_TEXT ToText;
 
-  if (DevicePath == NULL) {
-    return NULL;
-  }
+	if (DevicePath == NULL) {
+		return NULL;
+	}
 
-  ZeroMem (&Str, sizeof (Str));
+	ZeroMem (&Str, sizeof (Str));
 
-  //
-  // Process each device path node
-  //
-  Node = (EFI_DEVICE_PATH_PROTOCOL *) DevicePath;
-  while (!IsDevicePathEnd (Node)) {
-    //
-    // Find the handler to dump this device path node
-    // If not found, use a generic function
-    //
-    ToText = DevPathToTextNodeGeneric;
-    for (Index = 0; PatchedDevicePathToTextTable[Index].Function != NULL; Index += 1) {
+	//
+	// Process each device path node
+	//
+	Node = (EFI_DEVICE_PATH_PROTOCOL *) DevicePath;
+	while (!IsDevicePathEnd (Node)) {
+		//
+		// Find the handler to dump this device path node
+		// If not found, use a generic function
+		//
+		ToText = DevPathToTextNodeGeneric;
+		for (Index = 0; PatchedDevicePathToTextTable[Index].Function != NULL; Index += 1) {
+			if (DevicePathType (Node) == PatchedDevicePathToTextTable[Index].Type &&
+					DevicePathSubType (Node) == PatchedDevicePathToTextTable[Index].SubType
+			) {
+				ToText = PatchedDevicePathToTextTable[Index].Function;
+				break;
+			}
+		}
+		//
+		// Put a path separator in if needed
+		//
+		if ((Str.Count != 0) && (ToText != DevPathToTextEndInstance)) {
+			if (Str.Str[Str.Count] != L',') {
+				UefiDevicePathLibCatPrint (&Str, L"/");
+			}
+		}
 
-      if (DevicePathType (Node) == PatchedDevicePathToTextTable[Index].Type &&
-          DevicePathSubType (Node) == PatchedDevicePathToTextTable[Index].SubType
-          ) {
-        ToText = PatchedDevicePathToTextTable[Index].Function;
-        break;
-      }
-    }
-    //
-    //  Put a path separator in if needed
-    //
-    if ((Str.Count != 0) && (ToText != DevPathToTextEndInstance)) {
-      if (Str.Str[Str.Count] != L',') {
-        UefiDevicePathLibCatPrint (&Str, L"/");
-      }
-    }
+		AlignedNode = AllocateCopyPool (DevicePathNodeLength (Node), Node);
+		//
+		// Print this node of the device path
+		//
+		ToText (&Str, AlignedNode, DisplayOnly, AllowShortcuts);
+		FreePool (AlignedNode);
 
-    AlignedNode = AllocateCopyPool (DevicePathNodeLength (Node), Node);
-    //
-    // Print this node of the device path
-    //
-    ToText (&Str, AlignedNode, DisplayOnly, AllowShortcuts);
-    FreePool (AlignedNode);
+		//
+		// Next device path node
+		//
+		Node = NextDevicePathNode (Node);
+	}
 
-    //
-    // Next device path node
-    //
-    Node = NextDevicePathNode (Node);
-  }
-
-  if (Str.Str == NULL) {
-    return AllocateZeroPool (sizeof (CHAR16));
-  } else {
-    return Str.Str;
-  }
+	if (Str.Str == NULL) {
+		return AllocateZeroPool (sizeof (CHAR16));
+	} else {
+		return Str.Str;
+	}
 }
 
 extern DEVICE_PATH_FROM_TEXT_TABLE mUefiDevicePathLibDevPathFromTextTable[];
@@ -473,6 +464,8 @@ void PatchDevicePathToFromTextTables ()
 	for (count = 0; mUefiDevicePathLibToTextTable[count].Type; count++);
 	PatchedDevicePathToTextTable = calloc(++count, sizeof(PatchedDevicePathToTextTable[0]));
 	bcopy(mUefiDevicePathLibToTextTable, PatchedDevicePathToTextTable, count * sizeof(PatchedDevicePathToTextTable[0]));
+
+	// patch copy of mUefiDevicePathLibToTextTable (because it is const)
 	for (i = 0; i < count ; i++) {
 		if (PatchedDevicePathToTextTable[i].Type == MESSAGING_DEVICE_PATH && PatchedDevicePathToTextTable[i].SubType == MSG_SASEX_DP ) {
 			PatchedDevicePathToTextTable[i].Function = PatchedDevPathToTextSasEx;
@@ -480,7 +473,7 @@ void PatchDevicePathToFromTextTables ()
 		}
 	}
 
-	// mUefiDevicePathLibDevPathFromTextTable is not const so we can patch it directly
+	// patch mUefiDevicePathLibDevPathFromTextTable directly (because it is not const)
 	for (i = 0; i < count ; i++) {
 		if (!StrCmp(mUefiDevicePathLibDevPathFromTextTable[i].DevicePathNodeText, L"SasEx")) {
 			mUefiDevicePathLibDevPathFromTextTable[i].Function = PatchedDevPathFromTextSasEx;
@@ -492,8 +485,7 @@ void PatchDevicePathToFromTextTables ()
 
 EFI_STATUS
 EFIAPI
-UefiBootServicesTableLibConstructor (
-  )
+UefiBootServicesTableLibConstructor ()
 {
 	ZeroMem(&BS, sizeof(&BS));
 	BS.HandleProtocol = &DontHandleProtocol;
@@ -510,19 +502,6 @@ UefiBootServicesTableLibConstructor (
 	// Cache pointer to the EFI Boot Services Table
 	//
 	gBS = gST->BootServices;
-	
-	/*
-	printf("hello4: mmap(%llx) %llx : %d\n",
-		   ((uint64_t)NodeSize & ~4095),
-		   (uint64_t)mmap((void*)((uint64_t)NodeSize & ~4095), 4096, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0), errno
-		   );
-	
-	// printf("hello3: mprotect(%x(%x), %lu, %d): %d, %d\n", (int)NodeSize & ~4095, NodeSize, (sizeof(NodeSize) + 4095) & ~4095, PROT_READ | PROT_WRITE, mprotect((void*)((uint64_t)NodeSize & ~4095), (sizeof(NodeSize) + 4095) & ~4095, PROT_READ | PROT_WRITE), errno);
-	
-	const DEVICE_NODE_TO_SIZE* thenode = &NodeSize[13];
-	DEVICE_NODE_TO_SIZE* thenode2 = thenode;
-	thenode2->SizeMin = 16;
-	*/
 	
 	PatchDevicePathToFromTextTables();
 	
