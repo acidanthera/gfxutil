@@ -1298,18 +1298,19 @@ int parse_args(int argc, char * argv[], SETTINGS *settings)
 		unsigned long argtlen = 0;
 		for (;;)
 		{
-			if (argtlen == argtlenmax)
+			if (argtlen == argtlenmax - 1)
 			{
 				argtlenmax += 10000;
 				argt = realloc(argt, argtlenmax);
 				if (!argt)
 					return 1;
 			}
-			unsigned long readlen = fread(argt + argtlen, 1, argtlenmax - argtlen, stdin);
+			unsigned long readlen = fread(argt + argtlen, 1, argtlenmax - argtlen - 1, stdin);
 			if (!readlen)
 				break;
 			argtlen += readlen;
 		}
+		argt[argtlen] = '\0';
 		return parse_generic_option(argt, argtlen, settings);
 	}
 	else

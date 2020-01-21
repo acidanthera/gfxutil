@@ -35,7 +35,13 @@ int PrintDevicePathUtilToText(void* bytepath, unsigned long bytepathlen, SETTING
 	{
 		fprintf(stdout, "# Converting %ld bytes to text\n", bytepathlen);
 	}
-	
+
+	if (!IsDevicePathValid(bytepath, bytepathlen))
+	{
+		fprintf(stdout, "# Invalid device path\n");
+		return 1;
+	}
+
 	VerifyDevicePathNodeSizes(bytepath);
 	CHAR16* textpath = PatchedConvertDevicePathToText(bytepath, settings->display_only, settings->allow_shortcuts);
 	
@@ -76,7 +82,9 @@ int OutputDevicePathUtilFromText(void* asciitextpath, unsigned long asciitextpat
 	{
 		fprintf(stdout, "# Converting %ld characters to bytes\n", asciitextpathlen);
 	}
-	
+
+	assert(strlen(asciitextpath) == asciitextpathlen);
+
 	CHAR16* textpath = AllocatePool((asciitextpathlen + 1) * sizeof (CHAR16));
 	if (textpath)
 	{
@@ -117,6 +125,11 @@ int parse_generic_option(char *arg, unsigned long arglen, SETTINGS *settings)
 		fprintf(stdout, "# Processing argument of length %lu\n", arglen);
 	}
 
+	if (!arg || !arglen)
+	{
+		return 1;
+	}
+
 	int i;
 
 	int bytepathlenmax = 10000;
@@ -124,18 +137,12 @@ int parse_generic_option(char *arg, unsigned long arglen, SETTINGS *settings)
 	UINT8* bytepath = malloc(bytepathlenmax);
 	if (!bytepath) return 1;
 	
-	if (!arg || !arglen)
-	{
-		free(bytepath);
-		return 1;
-	}
-
 	if (arg[0] == '%')
 	{
 		// convert hex "nvram -p" path
 		for (i = 0; i < arglen;)
 		{
-			if (bytepathlen == bytepathlenmax)
+			if (bytepathlen + 1 >= bytepathlenmax)
 			{
 				bytepathlenmax += 10000;
 				bytepath = realloc(bytepath, bytepathlenmax);
@@ -161,7 +168,7 @@ int parse_generic_option(char *arg, unsigned long arglen, SETTINGS *settings)
 		// convert hex "xxd -p" path
 		for (i = 0; i < arglen; i += 2)
 		{
-			if (bytepathlen == bytepathlenmax)
+			if (bytepathlen + 2 >= bytepathlenmax)
 			{
 				bytepathlenmax += 10000;
 				bytepath = realloc(bytepath, bytepathlenmax);
