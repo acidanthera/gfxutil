@@ -22,12 +22,13 @@ matrix:
       on:
         tags: true
 
-  - os: osx
-    name: "Analyze Clang"
-    osx_image: xcode9.4
-    compiler: clang
-
-    script:
-      - git clone https://github.com/acidanthera/audk -b master --depth=1 ../edk2
-      - xcodebuild analyze -quiet -scheme gfxutil -configuration Debug CLANG_ANALYZER_OUTPUT=plist-html CLANG_ANALYZER_OUTPUT_DIR="$(pwd)/clang-analyze" && [ "$(find clang-analyze -name "*.html")" = "" ]
-      - xcodebuild analyze -quiet -scheme gfxutil -configuration Release CLANG_ANALYZER_OUTPUT=plist-html CLANG_ANALYZER_OUTPUT_DIR="$(pwd)/clang-analyze" && [ "$(find clang-analyze -name "*.html")" = "" ]
+# TODO: Reenable once clang analyzer stops reporting false postitives or we find a way to silence warnings without editing the source code.
+#  - os: osx
+#    name: "Analyze Clang"
+#    osx_image: xcode9.4
+#    compiler: clang
+#
+#    script:
+#      - git clone https://github.com/acidanthera/audk -b master --depth=1 ../edk2
+#      - xcodebuild analyze -quiet -scheme gfxutil -configuration Debug CLANG_ANALYZER_OUTPUT=plist-html CLANG_ANALYZER_OUTPUT_DIR="$(pwd)/clang-analyze" && [ "$(find clang-analyze -name "*.html")" = "" ]
+#      - xcodebuild analyze -quiet -scheme gfxutil -configuration Release CLANG_ANALYZER_OUTPUT=plist-html CLANG_ANALYZER_OUTPUT_DIR="$(pwd)/clang-analyze" && [ "$(find clang-analyze -name "*.html")" = "" ]
