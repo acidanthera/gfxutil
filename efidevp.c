@@ -126,6 +126,7 @@ int parse_generic_option(char *arg, unsigned long arglen, SETTINGS *settings)
 	
 	if (!arg || !arglen)
 	{
+		free(bytepath);
 		return 1;
 	}
 
@@ -154,7 +155,8 @@ int parse_generic_option(char *arg, unsigned long arglen, SETTINGS *settings)
 		}
 		return PrintDevicePathUtilToText(bytepath, bytepathlen, settings);
 	}
-	else if ((arglen & 1) == 0 && allhex(arg, arglen))
+
+	if ((arglen & 1) == 0 && allhex(arg, arglen))
 	{
 		// convert hex "xxd -p" path
 		for (i = 0; i < arglen; i += 2)
@@ -168,19 +170,20 @@ int parse_generic_option(char *arg, unsigned long arglen, SETTINGS *settings)
 			}
 			bytepath[bytepathlen++] = hextobyte(arg + i);
 		}
-		return PrintDevicePathUtilToText(bytepath, bytepathlen, settings);
+		int r = PrintDevicePathUtilToText(bytepath, bytepathlen, settings);
+		free(bytepath);
+		return r;
 	}
-	else if (!isprint(arg[0]))
+
+	free(bytepath);
+
+	if (!isprint(arg[0]))
 	{
 		// convert binary path
 		return PrintDevicePathUtilToText(arg, arglen, settings);
 	}
-	else
-	{
-		return OutputDevicePathUtilFromText(arg, arglen, settings);
-	}
-	
-	return 0;
+
+	return OutputDevicePathUtilFromText(arg, arglen, settings);
 }
 
 //========================================================================================
@@ -385,9 +388,8 @@ int OutputPCIDevicePathsByTree1(io_service_t serviceNext, io_iterator_t services
 	{
 		io_iterator_t children;
 		io_registry_entry_t	child;
-		kern_return_t status;
 		serviceNext = IOIteratorNext(services);
-		status = IORegistryEntryGetChildIterator(service, settings->plane, &children);
+		IORegistryEntryGetChildIterator(service, settings->plane, &children);
 		child = IOIteratorNext(children);
 		OutputOneDevice(service, settings);
 		OutputPCIDevicePathsByTree1(child, children, settings);

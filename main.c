@@ -754,7 +754,7 @@ GFX_HEADER *CreateGFXFromPlist(CFPropertyListRef plist)
 		gfx_blockheader->records = num_rec;
 		
 		count = CFStringGetLength(dict_keys[i]) + 1;
-		CHAR16* bytes16 = calloc(count, sizeof(CHAR16));
+		bytes16 = calloc(count, sizeof(CHAR16));
 		if (!bytes16)
 		{
 			fprintf(stderr, "CreateGFXFromPlist: out of memory\n");
@@ -990,8 +990,8 @@ error:
 	free_gfx_entry_list(gfx_entry_head, gfx_entry_end);
 	free(gfx_entry);
 	free(gfx_header);
-	free(gfx_blockheader);
 	free_gfx_blockheader_list(gfx_blockheader_head, gfx_blockheader_end);
+	free(gfx_blockheader);
 	return NULL;
 }
 
