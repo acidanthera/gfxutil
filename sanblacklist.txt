@@ -1,0 +1,8 @@
+fun:ReadUnaligned16
+fun:WriteUnaligned16
+fun:ReadUnaligned24
+fun:WriteUnaligned24
+fun:ReadUnaligned32
+fun:WriteUnaligned32
+fun:ReadUnaligned64
+fun:WriteUnaligned64

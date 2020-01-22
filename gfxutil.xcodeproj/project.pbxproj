@@ -332,6 +332,7 @@
 					"-D_PCD_GET_MODE_32_PcdMaximumAsciiStringLength=0",
 					"-D_PCD_GET_MODE_32_PcdMaximumUnicodeStringLength=0",
 					"-D_PCD_GET_MODE_32_PcdMaximumDevicePathNodeCount=0",
+					"-fsanitize-blacklist=$(PROJECT_DIR)/sanblacklist.txt",
 				);
 				PRODUCT_NAME = gfxutil;
 				SYSTEM_HEADER_SEARCH_PATHS = "../edk2/MdePkg/Include/X64 ../edk2/MdePkg/Include ../edk2/MdePkg/Library/UefiDevicePathLib";
@@ -355,6 +356,7 @@
 					"-D_PCD_GET_MODE_32_PcdMaximumAsciiStringLength=0",
 					"-D_PCD_GET_MODE_32_PcdMaximumUnicodeStringLength=0",
 					"-D_PCD_GET_MODE_32_PcdMaximumDevicePathNodeCount=0",
+					"-fsanitize-blacklist=$(PROJECT_DIR)/sanblacklist.txt",
 				);
 				PRODUCT_NAME = gfxutil;
 				SYSTEM_HEADER_SEARCH_PATHS = "../edk2/MdePkg/Include/X64 ../edk2/MdePkg/Include ../edk2/MdePkg/Library/UefiDevicePathLib";
