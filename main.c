@@ -1092,8 +1092,8 @@ static void usage()
 	fprintf(stdout, "                (shortcut forms are used be some vendor messages)\n");
 	fprintf(stdout, "\n");
 	fprintf(stdout, "Command options are:\n");
-	fprintf(stdout, "[none pipe]     translate a device path to and from text\n");
-	fprintf(stdout, "-p              list all devicepaths for PCI devices in IODeviceTree plane\n");
+	fprintf(stdout, "-c, [pipe]      translate a device path to and from text\n");
+	fprintf(stdout, "-p, default     list all devicepaths for PCI devices in IODeviceTree plane\n");
 	fprintf(stdout, "-t              list all devicepaths for PCI and ACPI devices in IODeviceTree plane in tree order\n");
 	fprintf(stdout, "-f name         finds object devicepath with the given name from IODeviceTree plane\n");
 	fprintf(stdout, "-i fmt          infile type, fmt is one of (default is hex): xml bin hex\n");
@@ -1108,6 +1108,32 @@ static void usage()
 }
 
 int translate_properties (char * argv[], SETTINGS *settings);
+
+int handle_pipe(SETTINGS *settings)
+{
+	unsigned long argtlenmax = 10000;
+	char* argt = malloc(argtlenmax);
+	if (!argt)
+		return 1;
+	argt[0] = '\0';
+	unsigned long argtlen = 0;
+	for (;;)
+	{
+		if (argtlen == argtlenmax - 1)
+		{
+			argtlenmax += 10000;
+			argt = realloc(argt, argtlenmax);
+			if (!argt)
+				return 1;
+		}
+		unsigned long readlen = fread(argt + argtlen, 1, argtlenmax - argtlen - 1, stdin);
+		if (!readlen)
+			break;
+		argtlen += readlen;
+	}
+	argt[argtlen] = '\0';
+	return parse_generic_option(argt, argtlen, settings);
+}
 
 int parse_args(int argc, char * argv[], SETTINGS *settings)
 {
@@ -1129,7 +1155,7 @@ int parse_args(int argc, char * argv[], SETTINGS *settings)
 	settings->matched = false;
 	settings->plane = kIODeviceTreePlane;
 	
-	while((c = getopt(argc, argv, "vsnlmahdptf:i:o:") ) != -1)
+	while((c = getopt(argc, argv, "vsnlmahdcptf:i:o:") ) != -1)
 	{
 		switch(c)
 		{
@@ -1143,7 +1169,6 @@ int parse_args(int argc, char * argv[], SETTINGS *settings)
 					return 1;
 				}
 				return 0;
-				break;
 			case 'd':
 				if (optind + 2 != argc) {
 					usage();
@@ -1191,11 +1216,9 @@ int parse_args(int argc, char * argv[], SETTINGS *settings)
 			case 'a':
 				printf("%s Version: %s by McMatrix\n",argv[0],VERSION);
 				return 0;
-				break;
 			case 'h':
 				usage();
 				return 0;
-				break;
 			case 'i':
 				iflag++;
 				if(iflag > 1)
@@ -1261,19 +1284,18 @@ int parse_args(int argc, char * argv[], SETTINGS *settings)
 			case '?':
 				usage();
 				return 1;
-				break;
 			case 'l':
 				settings->display_only = 1;
 				break;
 			case 'm':
 				settings->allow_shortcuts = 0;
 				break;
+			case 'c':
+				return handle_pipe(settings);
 			case 'p':
 				return OutputPCIDevicePaths(settings);
-				break;
 			case 't':
 				return OutputPCIDevicePathsByTree(settings);
-				break;
 
 		}
 	}
@@ -1290,28 +1312,11 @@ int parse_args(int argc, char * argv[], SETTINGS *settings)
 	}
 	else if (optind == argc)
 	{
-		unsigned long argtlenmax = 10000;
-		char* argt = malloc(argtlenmax);
-		if (!argt)
-			return 1;
-		argt[0] = '\0';
-		unsigned long argtlen = 0;
-		for (;;)
+		if (isatty(fileno(stdin)))
 		{
-			if (argtlen == argtlenmax - 1)
-			{
-				argtlenmax += 10000;
-				argt = realloc(argt, argtlenmax);
-				if (!argt)
-					return 1;
-			}
-			unsigned long readlen = fread(argt + argtlen, 1, argtlenmax - argtlen - 1, stdin);
-			if (!readlen)
-				break;
-			argtlen += readlen;
+			return OutputPCIDevicePaths(settings);
 		}
-		argt[argtlen] = '\0';
-		return parse_generic_option(argt, argtlen, settings);
+		return handle_pipe(settings);
 	}
 	else
 	{

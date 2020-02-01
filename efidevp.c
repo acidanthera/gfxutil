@@ -83,7 +83,7 @@ int OutputDevicePathUtilFromText(void* asciitextpath, unsigned long asciitextpat
 		fprintf(stdout, "# Converting %ld characters to bytes\n", asciitextpathlen);
 	}
 
-	assert(strlen(asciitextpath) == asciitextpathlen);
+	assert(strlen(asciitextpath) <= asciitextpathlen);
 
 	CHAR16* textpath = AllocatePool((asciitextpathlen + 1) * sizeof (CHAR16));
 	if (textpath)
