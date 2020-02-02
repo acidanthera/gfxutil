@@ -1080,7 +1080,7 @@ static void usage()
 	fprintf(stdout, "GFX conversion utility version: %s. Copyright (c) 2007 McMatrix\n",VERSION);
 	fprintf(stdout, "This program comes with ABSOLUTELY NO WARRANTY. This is free software!\n");
 	fprintf(stdout, "\n");
-	fprintf(stdout, "gfxutil: [command_flags] [command_option] [other_options] [[infile] outfile | efidevicepath]\n");
+	fprintf(stdout, "gfxutil: [command_flags...] [command_action | [infile outfile] | efi_path]\n");
 	fprintf(stdout, "\n");
 	fprintf(stdout, "Command flags are:\n");
 	fprintf(stdout, "-v              verbose mode\n");
@@ -1089,19 +1089,25 @@ static void usage()
 	fprintf(stdout, "-l              shorter text representation of the display node is used, where applicable\n");
 	fprintf(stdout, "                (shorter text representations are not reversable)\n");
 	fprintf(stdout, "-m              shortcut forms of text representation for a device node should not be used\n");
-	fprintf(stdout, "                (shortcut forms are used be some vendor messages)\n");
-	fprintf(stdout, "\n");
-	fprintf(stdout, "Command options are:\n");
-	fprintf(stdout, "-c, [pipe]      translate a device path to and from text\n");
-	fprintf(stdout, "-p, default     list all devicepaths for PCI devices in IODeviceTree plane\n");
-	fprintf(stdout, "-t              list all devicepaths for PCI and ACPI devices in IODeviceTree plane in tree order\n");
-	fprintf(stdout, "-f name         finds object devicepath with the given name from IODeviceTree plane\n");
+	fprintf(stdout, "                (shortcut forms are used by some vendor messages)\n");
 	fprintf(stdout, "-i fmt          infile type, fmt is one of (default is hex): xml bin hex\n");
 	fprintf(stdout, "-o fmt          outfile type, fmt is one of (default is xml): xml bin hex\n");
-	fprintf(stdout, "-d path prop    output the efi device path, path is the ioreg path, prop is the property\n");
-	fprintf(stdout, "                (Eg. gfxutil -d IODeviceTree:/chosen boot-device-path)\n");
 	fprintf(stdout, "\n");
-	fprintf(stdout, "Other command options are:\n");
+	fprintf(stdout, "Command actions are:\n");
+	fprintf(stdout, "-p, default     list all device paths for PCI and ACPI devices in IODeviceTree plane\n");
+	fprintf(stdout, "-f name         find device paths for objects with the given name from IODeviceTree plane\n");
+	fprintf(stdout, "infile outfile  convert properties list from infile to outfile\n");
+	fprintf(stdout, "-d path prop    output the EFI device path; path is the ioreg path, prop is the property\n");
+	fprintf(stdout, "                  (eg. gfxutil -d IODeviceTree:/chosen boot-device-path)\n");
+	fprintf(stdout, "-c, <pipe>      convert an EFI device path from stdin to text or hex\n");
+	fprintf(stdout, "[-c] efi_path   convert an EFI device path to text or hex\n");
+	fprintf(stdout, "                  EFI device path formats:\n");
+	fprintf(stdout, "                    binary: (input only) can only come from stdin\n");
+	fprintf(stdout, "                    nvram: (input only) output by the nvram command, starts with %%\n");
+	fprintf(stdout, "                    hex: (input/output) hex digits, no spaces\n");
+	fprintf(stdout, "                    text: (input/output) a text representation of an EFI device path\n");
+	fprintf(stdout, "\n");
+	fprintf(stdout, "Other command actions are:\n");
 	fprintf(stdout, "-h              print this summary\n");
 	fprintf(stdout, "-a              show version\n");
 	fprintf(stdout, "\n");
@@ -1109,12 +1115,13 @@ static void usage()
 
 int translate_properties (char * argv[], SETTINGS *settings);
 
-int handle_pipe(SETTINGS *settings)
+char * read_stdin (unsigned long *argtlen_out)
 {
+	*argtlen_out = 0;
 	unsigned long argtlenmax = 10000;
 	char* argt = malloc(argtlenmax);
 	if (!argt)
-		return 1;
+		return NULL;
 	argt[0] = '\0';
 	unsigned long argtlen = 0;
 	for (;;)
@@ -1124,7 +1131,7 @@ int handle_pipe(SETTINGS *settings)
 			argtlenmax += 10000;
 			argt = realloc(argt, argtlenmax);
 			if (!argt)
-				return 1;
+				return NULL;
 		}
 		unsigned long readlen = fread(argt + argtlen, 1, argtlenmax - argtlen - 1, stdin);
 		if (!readlen)
@@ -1132,6 +1139,16 @@ int handle_pipe(SETTINGS *settings)
 		argtlen += readlen;
 	}
 	argt[argtlen] = '\0';
+	*argtlen_out = argtlen;
+	return argt;
+}
+
+int translate_path_from_stdin(SETTINGS *settings)
+{
+	unsigned long argtlen;
+	char* argt = read_stdin(&argtlen);
+	if (!argt)
+		return 1;
 	return parse_generic_option(argt, argtlen, settings);
 }
 
@@ -1155,7 +1172,7 @@ int parse_args(int argc, char * argv[], SETTINGS *settings)
 	settings->matched = false;
 	settings->plane = kIODeviceTreePlane;
 	
-	while((c = getopt(argc, argv, "vsnlmahdcptf:i:o:") ) != -1)
+	while((c = getopt(argc, argv, "vsnlmahdcpf:i:o:") ) != -1)
 	{
 		switch(c)
 		{
@@ -1291,12 +1308,16 @@ int parse_args(int argc, char * argv[], SETTINGS *settings)
 				settings->allow_shortcuts = 0;
 				break;
 			case 'c':
-				return handle_pipe(settings);
+				if (optind == argc) {
+					return translate_path_from_stdin(settings);
+				}
+				if (optind + 1 == argc) {
+					return parse_generic_option(argv[optind], strlen(argv[optind]), settings);
+				}
+				usage();
+				return 1;
 			case 'p':
-				return OutputPCIDevicePaths(settings);
-			case 't':
 				return OutputPCIDevicePathsByTree(settings);
-
 		}
 	}
 	
@@ -1314,9 +1335,9 @@ int parse_args(int argc, char * argv[], SETTINGS *settings)
 	{
 		if (isatty(fileno(stdin)))
 		{
-			return OutputPCIDevicePaths(settings);
+			return OutputPCIDevicePathsByTree(settings);
 		}
-		return handle_pipe(settings);
+		return translate_path_from_stdin(settings);
 	}
 	else
 	{
