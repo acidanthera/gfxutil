@@ -1472,7 +1472,7 @@ void print_gfx(GFX_HEADER * gfx)
 				switch(gfx_entry_tmp->val_type)
 				{
 					case DATA_STRING:
-						printf("  \"%s\"='%s'\n",gfx_entry_tmp->key, gfx_entry_tmp->val);
+						printf("  \"%s\"='%.*s'\n",gfx_entry_tmp->key, gfx_entry_tmp->val_len, gfx_entry_tmp->val);
 					break;
 					case DATA_INT8:
 						int8 = READ_UINT8(gfx_entry_tmp->val);
