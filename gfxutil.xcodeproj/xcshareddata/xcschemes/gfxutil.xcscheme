@@ -48,7 +48,6 @@
       enableUBSanitizer = "YES"
       launchStyle = "0"
       useCustomWorkingDirectory = "NO"
-      customWorkingDirectory = "/Volumes/Work/Programming/ThunderboltProjects/OSXOLVED/Thunderbolt"
       ignoresPersistentStateOnLaunch = "NO"
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
@@ -69,12 +68,16 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
+            argument = "-vsn -o xml -i bin deviceproperties.bin deviceproperties.plist"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
             argument = "PciRoot(0x0)/Pci(0x1B,0x0)/Pci(0x0,0x0)/SasEx(0x01,0x0,0x0,NoTopology,0,0,0)/MediaPath(1,02000000062C0100000000004D7D000100000000E7F9C0CA664DA545B0BD10A52E34EC5D0202)/MediaPath(3,F7FC74BE7C0BF349914701F4042E68426C5C2FE7555CC34AAABF0209EB218507)"
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "030a2c001b619942c94cdf43882b2a0707a4a95f53dacd73f295b442bc876e5f0d2c535b002291a83e9d01000101060000010101060000007fff0400"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
       </CommandLineArguments>
    </LaunchAction>
