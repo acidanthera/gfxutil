@@ -58,7 +58,14 @@ int PrintDevicePathUtilToText(void* bytepath, unsigned long bytepathlen, SETTING
 		if (asciitextpath)
 		{
 			UnicodeStrToAsciiStr(textpath, asciitextpath);
-			fprintf(stdout, "%s", asciitextpath);
+			if (isatty(fileno(stdout)))
+			{
+				fprintf(stdout, "%s\n", asciitextpath);
+			}
+			else
+			{
+				fprintf(stdout, "%s", asciitextpath);
+			}
 			FreePool(asciitextpath);
 		}
 		else
@@ -101,6 +108,10 @@ int OutputDevicePathUtilFromText(void* asciitextpath, unsigned long asciitextpat
 				node = (EFI_DEVICE_PATH_PROTOCOL *)((UINT8*)node + nodelen);
 			}
 			PrintMem (bytepath, bytepathlen);
+			if (isatty(fileno(stdout)))
+			{
+				putchar('\n');
+			}
 		}
 		else
 		{
