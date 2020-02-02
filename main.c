@@ -1094,7 +1094,8 @@ static void usage()
 	fprintf(stdout, "-o fmt          outfile type, fmt is one of (default is xml): xml bin hex\n");
 	fprintf(stdout, "\n");
 	fprintf(stdout, "Command actions are:\n");
-	fprintf(stdout, "-p, default     list all device paths for PCI and ACPI devices in IODeviceTree plane\n");
+	fprintf(stdout, "-p, default     list all device paths for PCI devices in IODeviceTree plane\n");
+	fprintf(stdout, "-t              list all device paths for PCI and ACPI devices in IODeviceTree plane in tree order\n");
 	fprintf(stdout, "-f name         find device paths for objects with the given name from IODeviceTree plane\n");
 	fprintf(stdout, "infile outfile  convert properties list from infile to outfile\n");
 	fprintf(stdout, "-d path prop    output the EFI device path; path is the ioreg path, prop is the property\n");
@@ -1172,7 +1173,7 @@ int parse_args(int argc, char * argv[], SETTINGS *settings)
 	settings->matched = false;
 	settings->plane = kIODeviceTreePlane;
 	
-	while((c = getopt(argc, argv, "vsnlmahdcpf:i:o:") ) != -1)
+	while((c = getopt(argc, argv, "vsnlmahdcptf:i:o:") ) != -1)
 	{
 		switch(c)
 		{
@@ -1317,6 +1318,8 @@ int parse_args(int argc, char * argv[], SETTINGS *settings)
 				usage();
 				return 1;
 			case 'p':
+				return OutputPCIDevicePaths(settings);
+			case 't':
 				return OutputPCIDevicePathsByTree(settings);
 		}
 	}
@@ -1335,7 +1338,7 @@ int parse_args(int argc, char * argv[], SETTINGS *settings)
 	{
 		if (isatty(fileno(stdin)))
 		{
-			return OutputPCIDevicePathsByTree(settings);
+			return OutputPCIDevicePaths(settings);
 		}
 		return translate_path_from_stdin(settings);
 	}

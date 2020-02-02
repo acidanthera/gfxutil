@@ -386,7 +386,6 @@ void OutputOneDevice(io_service_t device, SETTINGS *settings)
 	} // if IOPCIDevice, IOACPIPlatformDevice
 } // OutputOneDevice
 
-/*
 int OutputPCIDevicePaths(SETTINGS *settings)
 {
 	io_iterator_t iterator;
@@ -400,7 +399,6 @@ int OutputPCIDevicePaths(SETTINGS *settings)
 	IOObjectRelease(iterator);
 	return 0;
 } // OutputPCIDevicePaths
-*/
 
 int OutputPCIDevicePathsByTree1(io_service_t serviceNext, io_iterator_t services, SETTINGS *settings)
 {
