@@ -159,7 +159,9 @@ int parse_generic_option(char *arg, unsigned long arglen, SETTINGS *settings)
 				bytepath[bytepathlen++] = arg[i++];
 			}
 		}
-		return PrintDevicePathUtilToText(bytepath, bytepathlen, settings);
+		int result = PrintDevicePathUtilToText(bytepath, bytepathlen, settings);
+		free(bytepath);
+		return result;
 	}
 
 	if ((arglen & 1) == 0 && allhex(arg, arglen))
@@ -176,9 +178,9 @@ int parse_generic_option(char *arg, unsigned long arglen, SETTINGS *settings)
 			}
 			bytepath[bytepathlen++] = hextobyte(arg + i);
 		}
-		int r = PrintDevicePathUtilToText(bytepath, bytepathlen, settings);
+		int result = PrintDevicePathUtilToText(bytepath, bytepathlen, settings);
 		free(bytepath);
-		return r;
+		return result;
 	}
 
 	free(bytepath);
