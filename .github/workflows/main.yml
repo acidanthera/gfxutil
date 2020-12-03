@@ -18,28 +18,30 @@ jobs:
       JOB_TYPE: BUILD
     steps:
       - uses: actions/checkout@v2
+        with:
+          path: gfxutil
       - uses: actions/checkout@v2
         with:
           repository: acidanthera/audk
-          path: ../edk2
+          path: edk2
       - name: CI Bootstrap
         run: |
-          src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
+          cd gfxutil; src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
 
-      - run: xcodebuild -jobs 1 -configuration Debug
-      - run: xcodebuild -jobs 1 -configuration Release
+      - run: cd gfxutil; xcodebuild -jobs 1 -configuration Debug
+      - run: cd gfxutil; xcodebuild -jobs 1 -configuration Release
 
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v2
         with:
           name: Artifacts
-          path: build/*/*.zip
+          path: gfxutil/build/*/*.zip
       - name: Upload to Release
         if: github.event_name == 'release'
         uses: svenstaro/upload-release-action@e74ff71f7d8a4c4745b560a485cc5fdb9b5b999d
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: build/*/*.zip
+          file: gfxutil/build/*/*.zip
           tag: ${{ github.ref }}
           file_glob: true
 
@@ -51,16 +53,18 @@ jobs:
 #       JOB_TYPE: ANALYZE
 #     steps:
 #       - uses: actions/checkout@v2
+#         with:
+#           path: gfxutil
 #       - uses: actions/checkout@v2
 #         with:
 #           repository: acidanthera/audk
-#           path: ../edk2
+#           path: edk2
 #       - name: CI Bootstrap
 #         run: |
-#           src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
+#           cd gfxutil; src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
 # 
-#       - run: xcodebuild analyze -quiet -scheme gfxutil -configuration Debug CLANG_ANALYZER_OUTPUT=plist-html CLANG_ANALYZER_OUTPUT_DIR="$(pwd)/clang-analyze" && [ "$(find clang-analyze -name "*.html")" = "" ]
-#       - run: xcodebuild analyze -quiet -scheme gfxutil -configuration Release CLANG_ANALYZER_OUTPUT=plist-html CLANG_ANALYZER_OUTPUT_DIR="$(pwd)/clang-analyze" && [ "$(find clang-analyze -name "*.html")" = "" ]
+#       - run: cd gfxutil; xcodebuild analyze -quiet -scheme gfxutil -configuration Debug CLANG_ANALYZER_OUTPUT=plist-html CLANG_ANALYZER_OUTPUT_DIR="$(pwd)/clang-analyze" && [ "$(find clang-analyze -name "*.html")" = "" ]
+#       - run: cd gfxutil; xcodebuild analyze -quiet -scheme gfxutil -configuration Release CLANG_ANALYZER_OUTPUT=plist-html CLANG_ANALYZER_OUTPUT_DIR="$(pwd)/clang-analyze" && [ "$(find clang-analyze -name "*.html")" = "" ]
 # 
 #   analyze-coverity:
 #     name: Analyze Coverity
@@ -70,17 +74,19 @@ jobs:
 #     if: github.repository_owner == 'acidanthera' && github.event_name != 'pull_request'
 #     steps:
 #       - uses: actions/checkout@v2
+#         with:
+#           path: gfxutil
 #       - uses: actions/checkout@v2
 #         with:
 #           repository: acidanthera/audk
-#           path: ../edk2
+#           path: edk2
 #       - name: CI Bootstrap
 #         run: |
-#           src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
+#           cd gfxutil; src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
 # 
 #       - name: Run Coverity
 #         run: |
-#           src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/coverity/covstrap.sh) && eval "$src" || exit 1
+#           cd gfxutil; src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/coverity/covstrap.sh) && eval "$src" || exit 1
 #         env:
 #           COVERITY_SCAN_TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
 #           COVERITY_SCAN_EMAIL: ${{ secrets.COVERITY_SCAN_EMAIL }}
