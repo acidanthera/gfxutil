@@ -1457,7 +1457,7 @@ void print_gfx(GFX_HEADER * gfx)
 		if(devpath_text16 != NULL) {
 			devpath_text = (char *)calloc(StrLen(devpath_text16) + 1, sizeof(char));
 			if (devpath_text) {
-				UnicodeStrToAsciiStr(devpath_text16, devpath_text);
+				UnicodeStrToAsciiStrS(devpath_text16, devpath_text, StrLen(devpath_text16) + 1);
 				printf("%s <size=%d, records=%d>\n",(devpath_text != NULL)?devpath_text:"???", gfx_blockheader_tmp->blocksize, gfx_blockheader_tmp->records);
 				free(devpath_text);
 				devpath_text = NULL;

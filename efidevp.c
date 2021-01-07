@@ -57,7 +57,7 @@ int PrintDevicePathUtilToText(void* bytepath, unsigned long bytepathlen, SETTING
 		CHAR8* asciitextpath = AllocatePool(textlen + 1);
 		if (asciitextpath)
 		{
-			UnicodeStrToAsciiStr(textpath, asciitextpath);
+			UnicodeStrToAsciiStrS(textpath, asciitextpath, textlen + 1);
 			if (isatty(fileno(stdout)))
 			{
 				fprintf(stdout, "%s\n", asciitextpath);
@@ -95,7 +95,7 @@ int OutputDevicePathUtilFromText(void* asciitextpath, unsigned long asciitextpat
 	CHAR16* textpath = AllocatePool((asciitextpathlen + 1) * sizeof (CHAR16));
 	if (textpath)
 	{
-		AsciiStrToUnicodeStr(asciitextpath, textpath);
+		AsciiStrToUnicodeStrS(asciitextpath, textpath, asciitextpathlen + 1);
 		EFI_DEVICE_PATH_PROTOCOL *bytepath = ConvertTextToDevicePath(textpath);
 		if (bytepath)
 		{
@@ -268,7 +268,7 @@ void GetPaths(io_service_t device, char *ioregPath, char **efiPath, SETTINGS *se
 				size = sizeof(pnp); if (IORegistryEntryGetProperty(device, "compatible", pnp, &size)) {
 					size = sizeof(pnp); IORegistryEntryGetProperty(device, "name", pnp, &size);
 				}
-				AsciiStrToUnicodeStr(pnp, pnp16);
+				AsciiStrToUnicodeStrS(pnp, pnp16, ARRAY_SIZE(pnp16));
 				ACPI_HID_DEVICE_PATH *Acpi = (ACPI_HID_DEVICE_PATH *) CreateDeviceNode (ACPI_DEVICE_PATH, ACPI_DP, sizeof(ACPI_HID_DEVICE_PATH));
 				Acpi->HID = EisaIdFromText(pnp16);
 				Acpi->UID = (UINT32)strtoul(uid, NULL, 16);
@@ -302,7 +302,7 @@ void GetPaths(io_service_t device, char *ioregPath, char **efiPath, SETTINGS *se
 		if(devpath_text16) {
 			devpath_text = (char *)calloc(StrLen(devpath_text16) + 1, sizeof(char));
 			if (devpath_text) {
-				UnicodeStrToAsciiStr(devpath_text16, devpath_text);
+				UnicodeStrToAsciiStrS(devpath_text16, devpath_text, StrLen(devpath_text16) + 1);
 				if (efiPath) *efiPath = devpath_text;
 			}
 			free(devpath_text16);
