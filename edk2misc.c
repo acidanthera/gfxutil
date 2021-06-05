@@ -134,6 +134,22 @@ typedef struct {
 } PATCHED_SASEX_DEVICE_PATH;
 
 
+BOOLEAN
+EFIAPI
+OldIsDevicePathEndType (
+  IN CONST VOID  *Node
+);
+
+BOOLEAN
+EFIAPI
+IsDevicePathEndType (
+  IN CONST VOID  *Node
+  )
+{
+  ASSERT (Node != NULL);
+  return (BOOLEAN) ((DevicePathType (Node) & EFI_DP_TYPE_MASK) == END_DEVICE_PATH_TYPE);
+}
+
 VOID
 OldDevPathToTextSasEx (
 	IN OUT POOL_PRINT *Str,
@@ -327,6 +343,10 @@ const DEVICE_NODE_TO_SIZE NodeSize[] = {
 	{BBS_DEVICE_PATH       , BBS_BBS_DP                       , psize(Bbs)                       , 0, 0 },
 	{END_DEVICE_PATH_TYPE  , END_INSTANCE_DEVICE_PATH_SUBTYPE , psize(DevPath)                   , 0, 0 },
 	{END_DEVICE_PATH_TYPE  , END_ENTIRE_DEVICE_PATH_SUBTYPE   , psize(DevPath)                   , 0, 0 },
+	{EFI_DP_TYPE_UNPACKED +
+	 END_DEVICE_PATH_TYPE  , END_INSTANCE_DEVICE_PATH_SUBTYPE , psize(DevPath)                   , 0, 0 },
+	{EFI_DP_TYPE_UNPACKED +
+	 END_DEVICE_PATH_TYPE  , END_ENTIRE_DEVICE_PATH_SUBTYPE   , psize(DevPath)                   , 0, 0 },
 	{0                     , 0                                , psize(DevPath)                   , 1, 1 },
 };
 
@@ -377,6 +397,9 @@ void VerifyDevicePathNodeSizes(VOID * DevicePath) {
 		}
 		
 		if (IsDevicePathEnd (Node)) {
+			if (!OldIsDevicePathEndType (Node)) {
+				fprintf(stderr, "End node at offset %ld has type 0xFF which is valid for EFI but not UEFI.\n", (void*)Node-(void*)DevicePath);
+			}
 			break;
 		}
 		Node = NextDevicePathNode (Node);

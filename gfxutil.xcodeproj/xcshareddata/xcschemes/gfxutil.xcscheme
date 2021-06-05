@@ -68,6 +68,10 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
+            argument = "04061400CA98B835A9B6CE498C72904735CC49B7FFFF04007074616C380000000000000000000000000000000000000000000000000000000000000000000000"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
             argument = "-vsn -o xml -i bin deviceproperties.bin deviceproperties.plist"
             isEnabled = "NO">
          </CommandLineArgument>

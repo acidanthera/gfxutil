@@ -104,7 +104,7 @@ int OutputDevicePathUtilFromText(void* asciitextpath, unsigned long asciitextpat
 			{
 				int nodelen = node->Length[0] | node->Length[1] << 8;
 				bytepathlen += nodelen;
-				if (node->Type == END_DEVICE_PATH_TYPE && node->SubType == END_ENTIRE_DEVICE_PATH_SUBTYPE) break;
+				if ((node->Type & EFI_DP_TYPE_MASK) == END_DEVICE_PATH_TYPE && node->SubType == END_ENTIRE_DEVICE_PATH_SUBTYPE) break;
 				node = (EFI_DEVICE_PATH_PROTOCOL *)((UINT8*)node + nodelen);
 			}
 			PrintMem (bytepath, bytepathlen);
