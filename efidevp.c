@@ -43,7 +43,7 @@ int PrintDevicePathUtilToText(void* bytepath, unsigned long bytepathlen, SETTING
 	}
 
 	VerifyDevicePathNodeSizes(bytepath);
-	CHAR16* textpath = PatchedConvertDevicePathToText(bytepath, settings->display_only, settings->allow_shortcuts);
+	CHAR16* textpath = ConvertDevicePathToText(bytepath, settings->display_only, settings->allow_shortcuts);
 	
 	if (textpath)
 	{
@@ -298,7 +298,7 @@ void GetPaths(io_service_t device, char *ioregPath, char **efiPath, SETTINGS *se
 	if (DevicePath) {
 		char * devpath_text = NULL;
 		VerifyDevicePathNodeSizes(DevicePath);
-		CHAR16 *devpath_text16 = PatchedConvertDevicePathToText(DevicePath, settings->display_only, settings->allow_shortcuts);
+		CHAR16 *devpath_text16 = ConvertDevicePathToText(DevicePath, settings->display_only, settings->allow_shortcuts);
 		if(devpath_text16) {
 			devpath_text = (char *)calloc(StrLen(devpath_text16) + 1, sizeof(char));
 			if (devpath_text) {

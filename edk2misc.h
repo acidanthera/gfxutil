@@ -21,11 +21,3 @@ PrintMem (
 UINT32 EisaIdFromText ( IN CHAR16 *Text );
 
 void VerifyDevicePathNodeSizes(VOID * DevicePath);
-
-CHAR16 *
-EFIAPI
-PatchedConvertDevicePathToText (
-	IN CONST EFI_DEVICE_PATH_PROTOCOL *DevicePath,
-	IN BOOLEAN DisplayOnly,
-	IN BOOLEAN AllowShortcuts
-	);

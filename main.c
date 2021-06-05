@@ -653,7 +653,7 @@ CFDictionaryRef CreateGFXDictionary(GFX_HEADER * gfx)
 		}
 
 		VerifyDevicePathNodeSizes(gfx_blockheader_tmp->devpath);
-		dpath = PatchedConvertDevicePathToText (gfx_blockheader_tmp->devpath, 1, 1);
+		dpath = ConvertDevicePathToText (gfx_blockheader_tmp->devpath, 1, 1);
 		if(dpath != NULL)
 		{
 			key = CFStringCreateWithCharacters(kCFAllocatorDefault, dpath, StrLen(dpath));
@@ -1453,7 +1453,7 @@ void print_gfx(GFX_HEADER * gfx)
 		indent(true, depth, stackOfBits, false);
 
 		VerifyDevicePathNodeSizes(gfx_blockheader_tmp->devpath);
-		devpath_text16 = PatchedConvertDevicePathToText(gfx_blockheader_tmp->devpath, 1, 1);
+		devpath_text16 = ConvertDevicePathToText(gfx_blockheader_tmp->devpath, 1, 1);
 		if(devpath_text16 != NULL) {
 			devpath_text = (char *)calloc(StrLen(devpath_text16) + 1, sizeof(char));
 			if (devpath_text) {
