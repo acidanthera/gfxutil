@@ -346,7 +346,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_IDENTITY = "-";
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 1.80b;
+				CURRENT_PROJECT_VERSION = 1.81b;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -362,20 +362,20 @@
 				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = gfxutil;
 				SYSTEM_HEADER_SEARCH_PATHS = (
-					"../edk2/MdePkg/Include/X64",
-					"../edk2/MdePkg/Include",
-					"../edk2/MdePkg/Library/UefiDevicePathLib",
-					"../edk2/MdePkg/Library/UefiMemoryLib",
-					"../edk2/MdePkg/Library/BaseLib",
-					"../edk2/MdePkg/Library/BasePrintLib",
+					../edk2/MdePkg/Include/X64,
+					../edk2/MdePkg/Include,
+					../edk2/MdePkg/Library/UefiDevicePathLib,
+					../edk2/MdePkg/Library/UefiMemoryLib,
+					../edk2/MdePkg/Library/BaseLib,
+					../edk2/MdePkg/Library/BasePrintLib,
 				);
 				USER_HEADER_SEARCH_PATHS = (
-					"../edk2/MdePkg/Include/X64",
-					"../edk2/MdePkg/Include",
-					"../edk2/MdePkg/Library/UefiDevicePathLib",
-					"../edk2/MdePkg/Library/UefiMemoryLib",
-					"../edk2/MdePkg/Library/BaseLib",
-					"../edk2/MdePkg/Library/BasePrintLib",
+					../edk2/MdePkg/Include/X64,
+					../edk2/MdePkg/Include,
+					../edk2/MdePkg/Library/UefiDevicePathLib,
+					../edk2/MdePkg/Library/UefiMemoryLib,
+					../edk2/MdePkg/Library/BaseLib,
+					../edk2/MdePkg/Library/BasePrintLib,
 				);
 				ZERO_LINK = YES;
 			};
@@ -386,7 +386,7 @@
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_IDENTITY = "-";
-				CURRENT_PROJECT_VERSION = 1.80b;
+				CURRENT_PROJECT_VERSION = 1.81b;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
@@ -401,20 +401,20 @@
 				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = gfxutil;
 				SYSTEM_HEADER_SEARCH_PATHS = (
-					"../edk2/MdePkg/Include/X64",
-					"../edk2/MdePkg/Include",
-					"../edk2/MdePkg/Library/UefiDevicePathLib",
-					"../edk2/MdePkg/Library/UefiMemoryLib",
-					"../edk2/MdePkg/Library/BaseLib",
-					"../edk2/MdePkg/Library/BasePrintLib",
+					../edk2/MdePkg/Include/X64,
+					../edk2/MdePkg/Include,
+					../edk2/MdePkg/Library/UefiDevicePathLib,
+					../edk2/MdePkg/Library/UefiMemoryLib,
+					../edk2/MdePkg/Library/BaseLib,
+					../edk2/MdePkg/Library/BasePrintLib,
 				);
 				USER_HEADER_SEARCH_PATHS = (
-					"../edk2/MdePkg/Include/X64",
-					"../edk2/MdePkg/Include",
-					"../edk2/MdePkg/Library/UefiDevicePathLib",
-					"../edk2/MdePkg/Library/UefiMemoryLib",
-					"../edk2/MdePkg/Library/BaseLib",
-					"../edk2/MdePkg/Library/BasePrintLib",
+					../edk2/MdePkg/Include/X64,
+					../edk2/MdePkg/Include,
+					../edk2/MdePkg/Library/UefiDevicePathLib,
+					../edk2/MdePkg/Library/UefiMemoryLib,
+					../edk2/MdePkg/Library/BaseLib,
+					../edk2/MdePkg/Library/BasePrintLib,
 				);
 			};
 			name = Release;

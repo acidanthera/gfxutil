@@ -1,5 +1,8 @@
 gfxutil changelog
 =================
+#### 1.81b
+- Improved compatibility with older EFI device paths having invalid trailing node (0xFF)
+
 #### 1.80b
 - Replaced efidevp.h, efidevp.c according to the following changes:
 - Added edk2 for efi stuff. It is used for all device path conversions to and from text.
