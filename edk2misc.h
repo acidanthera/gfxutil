@@ -7,6 +7,10 @@
 
 #include "UefiDevicePathLib.h"
 
+#define EFI_DP_TYPE_MASK                    0x7F
+#define EFI_DP_TYPE_UNPACKED                0x80
+
+
 EFI_STATUS
 EFIAPI
 UefiBootServicesTableLibConstructor (void);
