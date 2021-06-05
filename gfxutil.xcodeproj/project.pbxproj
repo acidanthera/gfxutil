@@ -3,37 +3,38 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 45;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		6377A5BE23A56E5500AE5FF7 /* DivU64x32Remainder.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5A323A56E5300AE5FF7 /* DivU64x32Remainder.c */; };
-		6377A5BF23A56E5500AE5FF7 /* MultU64x32.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5A423A56E5400AE5FF7 /* MultU64x32.c */; };
-		6377A5C023A56E5500AE5FF7 /* String.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5A523A56E5400AE5FF7 /* String.c */; };
-		6377A5C123A56E5500AE5FF7 /* SwapBytes32.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5A623A56E5400AE5FF7 /* SwapBytes32.c */; };
-		6377A5C223A56E5500AE5FF7 /* SafeString.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5A723A56E5400AE5FF7 /* SafeString.c */; };
-		6377A5C323A56E5500AE5FF7 /* CopyMem.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5A823A56E5400AE5FF7 /* CopyMem.c */; };
-		6377A5C423A56E5500AE5FF7 /* SetMem.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5A923A56E5400AE5FF7 /* SetMem.c */; };
-		6377A5C523A56E5500AE5FF7 /* MemLibGuid.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5AA23A56E5400AE5FF7 /* MemLibGuid.c */; };
-		6377A5C623A56E5500AE5FF7 /* SwapBytes16.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5AB23A56E5400AE5FF7 /* SwapBytes16.c */; };
-		6377A5C723A56E5500AE5FF7 /* BitField.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5AC23A56E5400AE5FF7 /* BitField.c */; };
-		6377A5C823A56E5500AE5FF7 /* PrintLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5AD23A56E5400AE5FF7 /* PrintLib.c */; };
-		6377A5C923A56E5500AE5FF7 /* CopyMemWrapper.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5AE23A56E5400AE5FF7 /* CopyMemWrapper.c */; };
-		6377A5CA23A56E5500AE5FF7 /* RShiftU64.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5AF23A56E5400AE5FF7 /* RShiftU64.c */; };
-		6377A5CB23A56E5500AE5FF7 /* SwapBytes64.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5B023A56E5400AE5FF7 /* SwapBytes64.c */; };
-		6377A5CC23A56E5600AE5FF7 /* DivU64x32.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5B123A56E5400AE5FF7 /* DivU64x32.c */; };
-		6377A5CD23A56E5600AE5FF7 /* MemLibGeneric.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5B223A56E5400AE5FF7 /* MemLibGeneric.c */; };
-		6377A5CE23A56E5600AE5FF7 /* DevicePathToText.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5B323A56E5500AE5FF7 /* DevicePathToText.c */; };
-		6377A5CF23A56E5600AE5FF7 /* Math64.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5B423A56E5500AE5FF7 /* Math64.c */; };
-		6377A5D023A56E5600AE5FF7 /* DevicePathFromText.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5B523A56E5500AE5FF7 /* DevicePathFromText.c */; };
-		6377A5D123A56E5600AE5FF7 /* DevicePathUtilities.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5B623A56E5500AE5FF7 /* DevicePathUtilities.c */; };
-		6377A5D223A56E5600AE5FF7 /* LShiftU64.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5B723A56E5500AE5FF7 /* LShiftU64.c */; };
-		6377A5D323A56E5600AE5FF7 /* UefiDevicePathLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5B823A56E5500AE5FF7 /* UefiDevicePathLib.c */; };
-		6377A5D423A56E5600AE5FF7 /* DebugLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5B923A56E5500AE5FF7 /* DebugLib.c */; };
-		6377A5D523A56E5600AE5FF7 /* Unaligned.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5BA23A56E5500AE5FF7 /* Unaligned.c */; };
-		6377A5D623A56E5600AE5FF7 /* ZeroMemWrapper.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5BB23A56E5500AE5FF7 /* ZeroMemWrapper.c */; };
-		6377A5D723A56E5600AE5FF7 /* MemoryAllocationLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5BC23A56E5500AE5FF7 /* MemoryAllocationLib.c */; };
-		6377A5D823A56E5600AE5FF7 /* PrintLibInternal.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5BD23A56E5500AE5FF7 /* PrintLibInternal.c */; };
+		63740000266ACF1800ABDA7F /* DevicePathToText.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5B323A56E5500AE5FF7 /* DevicePathToText.c */; };
+		63740001266ACF1800ABDA7F /* PrintLibInternal.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5BD23A56E5500AE5FF7 /* PrintLibInternal.c */; };
+		63740002266ACF1800ABDA7F /* SwapBytes16.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5AB23A56E5400AE5FF7 /* SwapBytes16.c */; };
+		6374FFE7266ACF1800ABDA7F /* SwapBytes64.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5B023A56E5400AE5FF7 /* SwapBytes64.c */; };
+		6374FFE8266ACF1800ABDA7F /* ZeroMemWrapper.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5BB23A56E5500AE5FF7 /* ZeroMemWrapper.c */; };
+		6374FFE9266ACF1800ABDA7F /* DevicePathFromText.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5B523A56E5500AE5FF7 /* DevicePathFromText.c */; };
+		6374FFEA266ACF1800ABDA7F /* DevicePathUtilities.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5B623A56E5500AE5FF7 /* DevicePathUtilities.c */; };
+		6374FFEB266ACF1800ABDA7F /* Math64.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5B423A56E5500AE5FF7 /* Math64.c */; };
+		6374FFEC266ACF1800ABDA7F /* PrintLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5AD23A56E5400AE5FF7 /* PrintLib.c */; };
+		6374FFED266ACF1800ABDA7F /* MemLibGeneric.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5B223A56E5400AE5FF7 /* MemLibGeneric.c */; };
+		6374FFEE266ACF1800ABDA7F /* RShiftU64.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5AF23A56E5400AE5FF7 /* RShiftU64.c */; };
+		6374FFEF266ACF1800ABDA7F /* MultU64x32.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5A423A56E5400AE5FF7 /* MultU64x32.c */; };
+		6374FFF0266ACF1800ABDA7F /* DevicePathUtilitiesStandaloneMm.c in Sources */ = {isa = PBXBuildFile; fileRef = 639FC4072664B551006E6C44 /* DevicePathUtilitiesStandaloneMm.c */; };
+		6374FFF1266ACF1800ABDA7F /* MemLibGuid.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5AA23A56E5400AE5FF7 /* MemLibGuid.c */; };
+		6374FFF2266ACF1800ABDA7F /* SafeString.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5A723A56E5400AE5FF7 /* SafeString.c */; };
+		6374FFF3266ACF1800ABDA7F /* CopyMemWrapper.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5AE23A56E5400AE5FF7 /* CopyMemWrapper.c */; };
+		6374FFF4266ACF1800ABDA7F /* DivU64x32.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5B123A56E5400AE5FF7 /* DivU64x32.c */; };
+		6374FFF5266ACF1800ABDA7F /* SetMem.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5A923A56E5400AE5FF7 /* SetMem.c */; };
+		6374FFF6266ACF1800ABDA7F /* Unaligned.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5BA23A56E5500AE5FF7 /* Unaligned.c */; };
+		6374FFF7266ACF1800ABDA7F /* DivU64x32Remainder.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5A323A56E5300AE5FF7 /* DivU64x32Remainder.c */; };
+		6374FFF8266ACF1800ABDA7F /* SwapBytes32.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5A623A56E5400AE5FF7 /* SwapBytes32.c */; };
+		6374FFF9266ACF1800ABDA7F /* DebugLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5B923A56E5500AE5FF7 /* DebugLib.c */; };
+		6374FFFA266ACF1800ABDA7F /* UefiDevicePathLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5B823A56E5500AE5FF7 /* UefiDevicePathLib.c */; };
+		6374FFFB266ACF1800ABDA7F /* CopyMem.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5A823A56E5400AE5FF7 /* CopyMem.c */; };
+		6374FFFC266ACF1800ABDA7F /* BitField.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5AC23A56E5400AE5FF7 /* BitField.c */; };
+		6374FFFD266ACF1800ABDA7F /* MemoryAllocationLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5BC23A56E5500AE5FF7 /* MemoryAllocationLib.c */; };
+		6374FFFE266ACF1800ABDA7F /* LShiftU64.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5B723A56E5500AE5FF7 /* LShiftU64.c */; };
+		6374FFFF266ACF1800ABDA7F /* String.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5A523A56E5400AE5FF7 /* String.c */; };
 		6377A5DB23A572B000AE5FF7 /* edk2misc.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5DA23A572B000AE5FF7 /* edk2misc.c */; };
 		63C2792C23B32CAA008C348C /* efidevp.c in Sources */ = {isa = PBXBuildFile; fileRef = 63C2792B23B32CAA008C348C /* efidevp.c */; };
 		8DD76F770486A8DE00D96B5E /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 08FB7796FE84155DC02AAC07 /* main.c */; settings = {ATTRIBUTES = (); }; };
@@ -42,6 +43,24 @@
 		CE363A8220FE90F000ED7DC0 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE363A8120FE90F000ED7DC0 /* IOKit.framework */; };
 		CE363A8420FE90FC00ED7DC0 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE363A8320FE90FC00ED7DC0 /* CoreFoundation.framework */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXBuildRule section */
+		6374FFD6266AC3AF00ABDA7F /* PBXBuildRule */ = {
+			isa = PBXBuildRule;
+			compilerSpec = com.apple.compilers.proxy.script;
+			filePatterns = "*/edk2/*.c";
+			fileType = pattern.proxy;
+			inputFiles = (
+				"$(SRCROOT)/edk2.overrides",
+				"$(INPUT_FILE_PATH)",
+			);
+			isEditable = 1;
+			outputFiles = (
+				"$(DERIVED_SOURCES_DIR)/$(INPUT_FILE_BASE).c",
+			);
+			script = "perl -0777 edk2.overrides \"${INPUT_FILE_PATH}\" > \"${DERIVED_SOURCES_DIR}/${INPUT_FILE_BASE}.c\"\n";
+		};
+/* End PBXBuildRule section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		8DD76F7B0486A8DE00D96B5E /* CopyFiles */ = {
@@ -58,6 +77,7 @@
 
 /* Begin PBXFileReference section */
 		08FB7796FE84155DC02AAC07 /* main.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
+		6374005B266AE30600ABDA7F /* edk2.overrides */ = {isa = PBXFileReference; lastKnownFileType = text; path = edk2.overrides; sourceTree = "<group>"; };
 		6377A5A323A56E5300AE5FF7 /* DivU64x32Remainder.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = DivU64x32Remainder.c; path = ../edk2/MdePkg/Library/BaseLib/DivU64x32Remainder.c; sourceTree = "<group>"; };
 		6377A5A423A56E5400AE5FF7 /* MultU64x32.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = MultU64x32.c; path = ../edk2/MdePkg/Library/BaseLib/MultU64x32.c; sourceTree = "<group>"; };
 		6377A5A523A56E5400AE5FF7 /* String.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = String.c; path = ../edk2/MdePkg/Library/BaseLib/String.c; sourceTree = "<group>"; };
@@ -87,6 +107,7 @@
 		6377A5BD23A56E5500AE5FF7 /* PrintLibInternal.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = PrintLibInternal.c; path = ../edk2/MdePkg/Library/BasePrintLib/PrintLibInternal.c; sourceTree = "<group>"; };
 		6377A5DA23A572B000AE5FF7 /* edk2misc.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = edk2misc.c; sourceTree = "<group>"; };
 		6377A5DC23A5C97100AE5FF7 /* edk2misc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = edk2misc.h; sourceTree = "<group>"; };
+		639FC4072664B551006E6C44 /* DevicePathUtilitiesStandaloneMm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = DevicePathUtilitiesStandaloneMm.c; path = ../edk2/MdePkg/Library/UefiDevicePathLib/DevicePathUtilitiesStandaloneMm.c; sourceTree = "<group>"; };
 		63C2792A23B32CAA008C348C /* efidevp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = efidevp.h; sourceTree = "<group>"; };
 		63C2792B23B32CAA008C348C /* efidevp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = efidevp.c; sourceTree = "<group>"; };
 		63C2792D23B33648008C348C /* DevicePath.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = DevicePath.h; path = ../edk2/MdePkg/Include/Protocol/DevicePath.h; sourceTree = "<group>"; };
@@ -138,6 +159,7 @@
 				9813AB370D12A271001DF28C /* utils.h */,
 				08FB7796FE84155DC02AAC07 /* main.c */,
 				98CAD3FE0D3381B500808BB2 /* main.h */,
+				6374005B266AE30600ABDA7F /* edk2.overrides */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -161,6 +183,7 @@
 				6377A5B523A56E5500AE5FF7 /* DevicePathFromText.c */,
 				6377A5B323A56E5500AE5FF7 /* DevicePathToText.c */,
 				6377A5B623A56E5500AE5FF7 /* DevicePathUtilities.c */,
+				639FC4072664B551006E6C44 /* DevicePathUtilitiesStandaloneMm.c */,
 				6377A5B123A56E5400AE5FF7 /* DivU64x32.c */,
 				6377A5A323A56E5300AE5FF7 /* DivU64x32Remainder.c */,
 				6377A5B723A56E5500AE5FF7 /* LShiftU64.c */,
@@ -218,6 +241,7 @@
 				CE77590A211C3E240063EAE6 /* Archive */,
 			);
 			buildRules = (
+				6374FFD6266AC3AF00ABDA7F /* PBXBuildRule */,
 			);
 			dependencies = (
 			);
@@ -278,37 +302,38 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6377A5D523A56E5600AE5FF7 /* Unaligned.c in Sources */,
-				6377A5C723A56E5500AE5FF7 /* BitField.c in Sources */,
 				6377A5DB23A572B000AE5FF7 /* edk2misc.c in Sources */,
-				6377A5C823A56E5500AE5FF7 /* PrintLib.c in Sources */,
-				6377A5D323A56E5600AE5FF7 /* UefiDevicePathLib.c in Sources */,
 				8DD76F770486A8DE00D96B5E /* main.c in Sources */,
-				6377A5D623A56E5600AE5FF7 /* ZeroMemWrapper.c in Sources */,
-				6377A5BF23A56E5500AE5FF7 /* MultU64x32.c in Sources */,
 				9813AB380D12A271001DF28C /* utils.c in Sources */,
-				6377A5C223A56E5500AE5FF7 /* SafeString.c in Sources */,
-				6377A5C523A56E5500AE5FF7 /* MemLibGuid.c in Sources */,
-				6377A5D823A56E5600AE5FF7 /* PrintLibInternal.c in Sources */,
-				6377A5D723A56E5600AE5FF7 /* MemoryAllocationLib.c in Sources */,
-				6377A5C423A56E5500AE5FF7 /* SetMem.c in Sources */,
-				6377A5CF23A56E5600AE5FF7 /* Math64.c in Sources */,
-				6377A5CE23A56E5600AE5FF7 /* DevicePathToText.c in Sources */,
-				6377A5C123A56E5500AE5FF7 /* SwapBytes32.c in Sources */,
-				6377A5D123A56E5600AE5FF7 /* DevicePathUtilities.c in Sources */,
-				6377A5D223A56E5600AE5FF7 /* LShiftU64.c in Sources */,
-				6377A5C023A56E5500AE5FF7 /* String.c in Sources */,
-				6377A5D023A56E5600AE5FF7 /* DevicePathFromText.c in Sources */,
-				6377A5CD23A56E5600AE5FF7 /* MemLibGeneric.c in Sources */,
-				6377A5CC23A56E5600AE5FF7 /* DivU64x32.c in Sources */,
-				6377A5CA23A56E5500AE5FF7 /* RShiftU64.c in Sources */,
 				63C2792C23B32CAA008C348C /* efidevp.c in Sources */,
-				6377A5CB23A56E5500AE5FF7 /* SwapBytes64.c in Sources */,
-				6377A5C323A56E5500AE5FF7 /* CopyMem.c in Sources */,
-				6377A5C923A56E5500AE5FF7 /* CopyMemWrapper.c in Sources */,
-				6377A5BE23A56E5500AE5FF7 /* DivU64x32Remainder.c in Sources */,
-				6377A5C623A56E5500AE5FF7 /* SwapBytes16.c in Sources */,
-				6377A5D423A56E5600AE5FF7 /* DebugLib.c in Sources */,
+				6374FFFC266ACF1800ABDA7F /* BitField.c in Sources */,
+				6374FFF3266ACF1800ABDA7F /* CopyMemWrapper.c in Sources */,
+				6374FFF5266ACF1800ABDA7F /* SetMem.c in Sources */,
+				6374FFE7266ACF1800ABDA7F /* SwapBytes64.c in Sources */,
+				6374FFF8266ACF1800ABDA7F /* SwapBytes32.c in Sources */,
+				6374FFFE266ACF1800ABDA7F /* LShiftU64.c in Sources */,
+				6374FFEC266ACF1800ABDA7F /* PrintLib.c in Sources */,
+				63740002266ACF1800ABDA7F /* SwapBytes16.c in Sources */,
+				6374FFF2266ACF1800ABDA7F /* SafeString.c in Sources */,
+				6374FFEB266ACF1800ABDA7F /* Math64.c in Sources */,
+				6374FFF0266ACF1800ABDA7F /* DevicePathUtilitiesStandaloneMm.c in Sources */,
+				6374FFFA266ACF1800ABDA7F /* UefiDevicePathLib.c in Sources */,
+				6374FFEF266ACF1800ABDA7F /* MultU64x32.c in Sources */,
+				6374FFE9266ACF1800ABDA7F /* DevicePathFromText.c in Sources */,
+				6374FFF7266ACF1800ABDA7F /* DivU64x32Remainder.c in Sources */,
+				6374FFF4266ACF1800ABDA7F /* DivU64x32.c in Sources */,
+				6374FFEE266ACF1800ABDA7F /* RShiftU64.c in Sources */,
+				6374FFF9266ACF1800ABDA7F /* DebugLib.c in Sources */,
+				6374FFFD266ACF1800ABDA7F /* MemoryAllocationLib.c in Sources */,
+				6374FFED266ACF1800ABDA7F /* MemLibGeneric.c in Sources */,
+				6374FFF6266ACF1800ABDA7F /* Unaligned.c in Sources */,
+				63740001266ACF1800ABDA7F /* PrintLibInternal.c in Sources */,
+				6374FFFF266ACF1800ABDA7F /* String.c in Sources */,
+				6374FFFB266ACF1800ABDA7F /* CopyMem.c in Sources */,
+				6374FFE8266ACF1800ABDA7F /* ZeroMemWrapper.c in Sources */,
+				6374FFEA266ACF1800ABDA7F /* DevicePathUtilities.c in Sources */,
+				63740000266ACF1800ABDA7F /* DevicePathToText.c in Sources */,
+				6374FFF1266ACF1800ABDA7F /* MemLibGuid.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -334,9 +359,24 @@
 					"-D_PCD_GET_MODE_32_PcdMaximumDevicePathNodeCount=0",
 					"-fsanitize-blacklist=$(PROJECT_DIR)/sanblacklist.txt",
 				);
+				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = gfxutil;
-				SYSTEM_HEADER_SEARCH_PATHS = "../edk2/MdePkg/Include/X64 ../edk2/MdePkg/Include ../edk2/MdePkg/Library/UefiDevicePathLib";
-				USER_HEADER_SEARCH_PATHS = "../edk2/MdePkg/Include/X64 ../edk2/MdePkg/Include ../edk2/MdePkg/Library/UefiDevicePathLib";
+				SYSTEM_HEADER_SEARCH_PATHS = (
+					"../edk2/MdePkg/Include/X64",
+					"../edk2/MdePkg/Include",
+					"../edk2/MdePkg/Library/UefiDevicePathLib",
+					"../edk2/MdePkg/Library/UefiMemoryLib",
+					"../edk2/MdePkg/Library/BaseLib",
+					"../edk2/MdePkg/Library/BasePrintLib",
+				);
+				USER_HEADER_SEARCH_PATHS = (
+					"../edk2/MdePkg/Include/X64",
+					"../edk2/MdePkg/Include",
+					"../edk2/MdePkg/Library/UefiDevicePathLib",
+					"../edk2/MdePkg/Library/UefiMemoryLib",
+					"../edk2/MdePkg/Library/BaseLib",
+					"../edk2/MdePkg/Library/BasePrintLib",
+				);
 				ZERO_LINK = YES;
 			};
 			name = Debug;
@@ -358,9 +398,24 @@
 					"-D_PCD_GET_MODE_32_PcdMaximumDevicePathNodeCount=0",
 					"-fsanitize-blacklist=$(PROJECT_DIR)/sanblacklist.txt",
 				);
+				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = gfxutil;
-				SYSTEM_HEADER_SEARCH_PATHS = "../edk2/MdePkg/Include/X64 ../edk2/MdePkg/Include ../edk2/MdePkg/Library/UefiDevicePathLib";
-				USER_HEADER_SEARCH_PATHS = "../edk2/MdePkg/Include/X64 ../edk2/MdePkg/Include ../edk2/MdePkg/Library/UefiDevicePathLib";
+				SYSTEM_HEADER_SEARCH_PATHS = (
+					"../edk2/MdePkg/Include/X64",
+					"../edk2/MdePkg/Include",
+					"../edk2/MdePkg/Library/UefiDevicePathLib",
+					"../edk2/MdePkg/Library/UefiMemoryLib",
+					"../edk2/MdePkg/Library/BaseLib",
+					"../edk2/MdePkg/Library/BasePrintLib",
+				);
+				USER_HEADER_SEARCH_PATHS = (
+					"../edk2/MdePkg/Include/X64",
+					"../edk2/MdePkg/Include",
+					"../edk2/MdePkg/Library/UefiDevicePathLib",
+					"../edk2/MdePkg/Library/UefiMemoryLib",
+					"../edk2/MdePkg/Library/BaseLib",
+					"../edk2/MdePkg/Library/BasePrintLib",
+				);
 			};
 			name = Release;
 		};
@@ -380,6 +435,7 @@
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -394,7 +450,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 				VALID_ARCHS = "i386 x86_64";
@@ -417,6 +473,7 @@
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -430,7 +487,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 				VALID_ARCHS = "i386 x86_64";

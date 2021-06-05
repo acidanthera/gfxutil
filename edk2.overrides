@@ -1,0 +1,11 @@
+# Regular expressions to be performed on included edk2 *.c files.
+# -0777 is used to grab the entire file at once (see Build Rules).
+# Therefore, $_ is the entire file, /m is used to modify ^ and /s is used to modify .
+# See https://perldoc.perl.org/perlre
+
+while (<>) {
+	s/^(IsDevicePathEndType|DevPathToTextSasEx|DevPathFromTextSasEx)/Old\1/m;
+	s/^((\s*VOID\s+)Old(DevPathToTextSasEx.*?\)))/\2\3;\n\n\1/ms;
+	s/^((\s*EFI_DEVICE_PATH_PROTOCOL\s*\*\s+)Old(DevPathFromTextSasEx.*?\)))/\2\3;\n\n\1/ms;
+	print $_;
+}
