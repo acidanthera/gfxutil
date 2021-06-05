@@ -507,3 +507,12 @@ UefiBootServicesTableLibConstructor ()
 	
 	return EFI_SUCCESS;
 }
+
+EFI_DEVICE_PATH_PROTOCOL *
+EFIAPI
+DevicePathFromHandle (
+  IN EFI_HANDLE                      Handle
+  )
+{
+  return NULL;
+}

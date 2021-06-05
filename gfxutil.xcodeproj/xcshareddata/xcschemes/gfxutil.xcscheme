@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "1230"
+   LastUpgradeVersion = "1250"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -65,7 +65,7 @@
       <CommandLineArguments>
          <CommandLineArgument
             argument = "02010c00d041030a0000000001010600001b0101060000000316100001000000000000000000000004012a0002000000062c0100000000004d7d000100000000e7f9c0ca664da545b0bd10a52e34ec5d020204032400f7fc74be7c0bf349914701f4042e68426c5c2fe7555cc34aaabf0209eb2185077fff0400"
-            isEnabled = "NO">
+            isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-vsn -o xml -i bin deviceproperties.bin deviceproperties.plist"
