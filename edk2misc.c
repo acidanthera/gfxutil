@@ -263,6 +263,108 @@ DevPathFromTextSasEx (
 	return (EFI_DEVICE_PATH_PROTOCOL *) PatchedSasEx;
 }
 
+VOID
+OldDevPathToTextVendor (
+	IN OUT POOL_PRINT  *Str,
+	IN VOID            *DevPath,
+	IN BOOLEAN         DisplayOnly,
+	IN BOOLEAN         AllowShortcuts
+	);
+
+VOID
+DevPathToTextVendor (
+	IN OUT POOL_PRINT  *Str,
+	IN VOID            *DevPath,
+	IN BOOLEAN         DisplayOnly,
+	IN BOOLEAN         AllowShortcuts
+)
+{
+	VENDOR_DEVICE_PATH  *Vendor;
+	CHAR16              *Type;
+	UINTN               Index;
+	UINTN               DataLength;
+
+	if (DevicePathNodeLength(DevPath) >= sizeof(VENDOR_DEVICE_PATH)) {
+		OldDevPathToTextVendor(Str, DevPath, DisplayOnly, AllowShortcuts);
+		return;
+	}
+
+	Vendor = (VENDOR_DEVICE_PATH *) DevPath;
+	switch (DevicePathType (&Vendor->Header)) {
+		case HARDWARE_DEVICE_PATH:
+			Type = L"Hw";
+			break;
+
+		case MESSAGING_DEVICE_PATH:
+			Type = L"Msg";
+			break;
+
+		case MEDIA_DEVICE_PATH:
+			Type = L"Media";
+			break;
+
+		default:
+			Type = L"?";
+			break;
+	}
+
+	UefiDevicePathLibCatPrint (Str, L"Ven%s(", Type);
+	UINT8 *Data = (UINT8 *)&Vendor->Guid;
+	DataLength = DevicePathNodeLength (&Vendor->Header) - sizeof(Vendor->Header);
+	if (DataLength != 0) {
+		UefiDevicePathLibCatPrint (Str, L",");
+		for (Index = 0; Index < DataLength; Index++) {
+			UefiDevicePathLibCatPrint (Str, L"%02x", Data[Index]);
+		}
+	}
+
+	UefiDevicePathLibCatPrint (Str, L")");
+}
+
+EFI_DEVICE_PATH_PROTOCOL *
+ConvertFromTextVendor (
+	IN CHAR16  *TextDeviceNode,
+	IN UINT8   Type,
+	IN UINT8   SubType
+	);
+
+EFI_DEVICE_PATH_PROTOCOL *
+ConvertFromTextVendor (
+	IN CHAR16  *TextDeviceNode,
+	IN UINT8   Type,
+	IN UINT8   SubType
+	)
+{
+	CHAR16              *GuidStr;
+	CHAR16              *DataStr;
+	UINTN               Length;
+	VENDOR_DEVICE_PATH  *Vendor;
+
+	GuidStr = GetNextParamStr (&TextDeviceNode);
+
+	DataStr = GetNextParamStr (&TextDeviceNode);
+	Length  = StrLen (DataStr);
+	//
+	// Two hex characters make up 1 buffer byte
+	//
+	Length  = (Length + 1) / 2;
+
+	Vendor  = (VENDOR_DEVICE_PATH *) CreateDeviceNode (
+		Type,
+		SubType,
+		(UINT16) (sizeof (Vendor->Header) + (*GuidStr ? sizeof (Vendor->Guid) : 0) + Length)
+	);
+
+	if (*GuidStr) {
+		StrToGuid (GuidStr, &Vendor->Guid);
+		StrHexToBytes (DataStr, Length * 2, (UINT8 *) (Vendor + 1), Length);
+	}
+	else {
+		StrHexToBytes (DataStr, Length * 2, (UINT8 *) (&Vendor->Guid), Length);
+	}
+
+	return (EFI_DEVICE_PATH_PROTOCOL *) Vendor;
+}
 
 VOID
 DevPathToTextNodeGeneric (

@@ -4,8 +4,8 @@
 # See https://perldoc.perl.org/perlre
 
 while (<>) {
-	s/^(IsDevicePathEndType|DevPathToTextSasEx|DevPathFromTextSasEx)/Old\1/m;
-	s/^((\s*VOID\s+)Old(DevPathToTextSasEx.*?\)))/\2\3;\n\n\1/ms;
-	s/^((\s*EFI_DEVICE_PATH_PROTOCOL\s*\*\s+)Old(DevPathFromTextSasEx.*?\)))/\2\3;\n\n\1/ms;
+	s/^(IsDevicePathEndType|DevPathToTextSasEx|DevPathFromTextSasEx|DevPathToTextVendor|ConvertFromTextVendor)/Old\1/mg;
+	s/^((\s*VOID\s+)Old((DevPathToTextSasEx|DevPathToTextVendor).*?\)))/\2\3;\n\n\1/msg;
+	s/^((\s*EFI_DEVICE_PATH_PROTOCOL\s*\*\s+)Old((DevPathFromTextSasEx|ConvertFromTextVendor).*?\)))/\2\3;\n\n\1/msg;
 	print $_;
 }
