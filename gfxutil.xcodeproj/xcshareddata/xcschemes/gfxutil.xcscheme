@@ -65,11 +65,11 @@
       <CommandLineArguments>
          <CommandLineArgument
             argument = "02010c00d041030a0000000001010600001b0101060000000316100001000000000000000000000004012a0002000000062c0100000000004d7d000100000000e7f9c0ca664da545b0bd10a52e34ec5d020204032400f7fc74be7c0bf349914701f4042e68426c5c2fe7555cc34aaabf0209eb2185077fff0400"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "04061400CA98B835A9B6CE498C72904735CC49B7FFFF04007074616C380000000000000000000000000000000000000000000000000000000000000000000000"
-            isEnabled = "YES">
+            isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "-vsn -o xml -i bin deviceproperties.bin deviceproperties.plist"
@@ -82,6 +82,14 @@
          <CommandLineArgument
             argument = "030a2c001b619942c94cdf43882b2a0707a4a95f53dacd73f295b442bc876e5f0d2c535b002291a83e9d01000101060000010101060000007fff0400"
             isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "030A0500017FFF0400"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "VenMsg(00000000-0000-0000-0000-000000000000,0110)"
+            isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>
    </LaunchAction>
