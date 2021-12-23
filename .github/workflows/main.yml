@@ -28,8 +28,8 @@ jobs:
         run: |
           cd gfxutil; src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
 
-      - run: cd gfxutil; xcodebuild -jobs 1 -configuration Debug
-      - run: cd gfxutil; xcodebuild -jobs 1 -configuration Release
+      - run: cd gfxutil; xcodebuild -project gfxutil.xcodeproj -jobs 1 -configuration Debug
+      - run: cd gfxutil; xcodebuild -project gfxutil.xcodeproj -jobs 1 -configuration Release
 
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v2
@@ -63,8 +63,8 @@ jobs:
 #         run: |
 #           cd gfxutil; src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
 # 
-#       - run: cd gfxutil; xcodebuild analyze -quiet -scheme gfxutil -configuration Debug CLANG_ANALYZER_OUTPUT=plist-html CLANG_ANALYZER_OUTPUT_DIR="$(pwd)/clang-analyze" && [ "$(find clang-analyze -name "*.html")" = "" ]
-#       - run: cd gfxutil; xcodebuild analyze -quiet -scheme gfxutil -configuration Release CLANG_ANALYZER_OUTPUT=plist-html CLANG_ANALYZER_OUTPUT_DIR="$(pwd)/clang-analyze" && [ "$(find clang-analyze -name "*.html")" = "" ]
+#       - run: cd gfxutil; xcodebuild -project gfxutil.xcodeproj analyze -quiet -scheme gfxutil -configuration Debug CLANG_ANALYZER_OUTPUT=plist-html CLANG_ANALYZER_OUTPUT_DIR="$(pwd)/clang-analyze" && [ "$(find clang-analyze -name "*.html")" = "" ]
+#       - run: cd gfxutil; xcodebuild -project gfxutil.xcodeproj analyze -quiet -scheme gfxutil -configuration Release CLANG_ANALYZER_OUTPUT=plist-html CLANG_ANALYZER_OUTPUT_DIR="$(pwd)/clang-analyze" && [ "$(find clang-analyze -name "*.html")" = "" ]
 # 
 #   analyze-coverity:
 #     name: Analyze Coverity
@@ -90,4 +90,4 @@ jobs:
 #         env:
 #           COVERITY_SCAN_TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
 #           COVERITY_SCAN_EMAIL: ${{ secrets.COVERITY_SCAN_EMAIL }}
-#           COVERITY_BUILD_COMMAND: xcodebuild -configuration Release
+#           COVERITY_BUILD_COMMAND: xcodebuild -project gfxutil.xcodeproj -configuration Release
