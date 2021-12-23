@@ -500,7 +500,7 @@ int HexStringToBuf (unsigned char *Buf, unsigned int *Len, char *Str, unsigned i
   unsigned int HexCnt;
   unsigned int Idx;
   unsigned int BufferLength;
-  unsigned char Digit;
+  unsigned char Digit = 0;
   unsigned char Byte;
 
   // Find out how many hex characters the string has.
