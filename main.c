@@ -532,13 +532,13 @@ GFX_HEADER *parse_binary(unsigned char * bp, unsigned char * bpend, SETTINGS *se
 			{			
 				switch(data_len)
 				{
-					case sizeof(UINT8): // int8
+					case (unsigned int)sizeof(UINT8): // int8
 						gfx_entry->val_type = DATA_INT8;
 					break;
-					case sizeof(UINT16): //int16
+					case (unsigned int)sizeof(UINT16): //int16
 						gfx_entry->val_type = DATA_INT16;
 					break;
-					case sizeof(UINT32): //int32
+					case (unsigned int)sizeof(UINT32): //int32
 						gfx_entry->val_type = DATA_INT32;
 					break;
 					default:
@@ -995,6 +995,12 @@ error:
 	return NULL;
 }
 
+#ifndef CFErrorRef
+	#define CFErrorRef CFStringRef
+	#define CFPropertyListCreateWithStream CFPropertyListCreateFromStream
+	#define CFPropertyListWrite(propertyList, stream, format, options, error)  CFPropertyListWriteToStream(propertyList, stream, format, error)
+#endif
+
 int WritePropertyList(CFPropertyListRef propertyList, CFURLRef fileURL)
 {
 	CFWriteStreamRef stream;
@@ -1198,7 +1204,7 @@ int parse_args(int argc, char * argv[], SETTINGS *settings)
 				if (device != MACH_PORT_NULL)
 				{
 					char buffer[4096] = {0};
-					uint32_t size = sizeof(buffer);
+					uint32_t size = (uint32_t)sizeof(buffer);
 					
 					kern_return_t kr = IORegistryEntryGetProperty(device, argv[optind], buffer, &size);
 					IOObjectRelease(device);

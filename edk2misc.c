@@ -383,7 +383,7 @@ DevPathToTextEndInstance (
 );
 
 
-#define psize(x) sizeof(((EFI_DEV_PATH *)0)->x)
+#define psize(x) ((int)sizeof(((EFI_DEV_PATH *)0)->x))
 
 typedef struct {
 	UINT8 Type;
@@ -408,14 +408,14 @@ const DEVICE_NODE_TO_SIZE NodeSize[] = {
 	{MESSAGING_DEVICE_PATH , MSG_SCSI_DP                      , psize(Scsi)                      , 0, 0 },
 	{MESSAGING_DEVICE_PATH , MSG_FIBRECHANNEL_DP              , psize(FibreChannel)              , 0, 0 },
 	{MESSAGING_DEVICE_PATH , MSG_FIBRECHANNELEX_DP            , psize(FibreChannelEx)            , 0, 0 },
-	{MESSAGING_DEVICE_PATH , MSG_SASEX_DP                     , sizeof(PATCHED_SASEX_DEVICE_PATH), psize(SasEx), psize(SasEx) - sizeof(PATCHED_SASEX_DEVICE_PATH) }, // Patched to support both sizes
+	{MESSAGING_DEVICE_PATH , MSG_SASEX_DP                     , (int)sizeof(PATCHED_SASEX_DEVICE_PATH), psize(SasEx), psize(SasEx) - (int)sizeof(PATCHED_SASEX_DEVICE_PATH) }, // Patched to support both sizes
 	{MESSAGING_DEVICE_PATH , MSG_NVME_NAMESPACE_DP            , psize(NvmeNamespace)             , 0, 0 },
 	{MESSAGING_DEVICE_PATH , MSG_UFS_DP                       , psize(Ufs)                       , 0, 0 },
 	{MESSAGING_DEVICE_PATH , MSG_SD_DP                        , psize(Sd)                        , 0, 0 },
 	{MESSAGING_DEVICE_PATH , MSG_EMMC_DP                      , psize(Emmc)                      , 0, 0 },
 	{MESSAGING_DEVICE_PATH , MSG_1394_DP                      , psize(F1394)                     , 0, 0 },
 	{MESSAGING_DEVICE_PATH , MSG_USB_DP                       , psize(Usb)                       , 0, 0 },
-	{MESSAGING_DEVICE_PATH , MSG_USB_WWID_DP                  , psize(UsbWwid) + sizeof(CHAR16)  , 1, sizeof(CHAR16) }, // bug exists with zero length string, so add CHAR(16) for minimum
+	{MESSAGING_DEVICE_PATH , MSG_USB_WWID_DP                  , (int)psize(UsbWwid) + (int)sizeof(CHAR16)  , 1, (int)sizeof(CHAR16) }, // bug exists with zero length string, so add CHAR(16) for minimum
 	{MESSAGING_DEVICE_PATH , MSG_DEVICE_LOGICAL_UNIT_DP       , psize(LogicUnit)                 , 0, 0 },
 	{MESSAGING_DEVICE_PATH , MSG_USB_CLASS_DP                 , psize(UsbClass)                  , 0, 0 },
 	{MESSAGING_DEVICE_PATH , MSG_SATA_DP                      , psize(Sata)                      , 0, 0 },
@@ -432,7 +432,7 @@ const DEVICE_NODE_TO_SIZE NodeSize[] = {
 	{MESSAGING_DEVICE_PATH , MSG_URI_DP                       , psize(Uri)                       , 1, psize(Uri.Uri[0]) },
 	{MESSAGING_DEVICE_PATH , MSG_BLUETOOTH_DP                 , psize(Bluetooth)                 , 0, 0 },
 	{MESSAGING_DEVICE_PATH , MSG_WIFI_DP                      , psize(WiFi)                      , 0, 0 },
-	{MESSAGING_DEVICE_PATH , MSG_BLUETOOTH_LE_DP              , sizeof(BLUETOOTH_LE_DEVICE_PATH) , 0, 0 },
+	{MESSAGING_DEVICE_PATH , MSG_BLUETOOTH_LE_DP              , (int)sizeof(BLUETOOTH_LE_DEVICE_PATH) , 0, 0 },
 	{MEDIA_DEVICE_PATH     , MEDIA_HARDDRIVE_DP               , psize(HardDrive)                 , 0, 0 },
 	{MEDIA_DEVICE_PATH     , MEDIA_CDROM_DP                   , psize(CD)                        , 0, 0 },
 	{MEDIA_DEVICE_PATH     , MEDIA_VENDOR_DP                  , psize(Vendor)                    , 1, 1 },

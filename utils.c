@@ -362,7 +362,7 @@ unsigned int Xtoi (char *Str, unsigned int *Bytes)
 
   // convert hex digits
   u = 0;
-  Length = sizeof (unsigned int);
+  Length = (unsigned int)sizeof (unsigned int);
   HexStringToBuf ((unsigned char *) &u, &Length, Str, Bytes);
 
   return u;
@@ -374,7 +374,7 @@ void Xtoi64 (char *Str, unsigned long *Data, unsigned int *Bytes)
   unsigned int Length;
 
   *Data = 0;
-  Length = sizeof (unsigned long);
+  Length = (unsigned int)sizeof (unsigned long);
   HexStringToBuf ((unsigned char *) Data, &Length, Str, Bytes);
 }
 
@@ -464,7 +464,7 @@ int StrToBuf (unsigned char *Buf, unsigned int BufferLength, char *Str)
   unsigned char Byte;
 
   // Two hex char make up one byte
-  StrLength = BufferLength * sizeof (char);
+  StrLength = BufferLength * (unsigned int)sizeof (char);
 
   for(Index = 0; Index < StrLength; Index++, Str++) 
   {
