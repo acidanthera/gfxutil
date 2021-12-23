@@ -348,10 +348,6 @@ void OutputOneDevice(io_service_t device, SETTINGS *settings)
 				settings->matched = true;
 				doit = true;
 			}
-
-			IOObjectRelease((unsigned int)prop_name);
-			IOObjectRelease((unsigned int)prop_ioname);
-			IOObjectRelease((unsigned int)name);
 		}
 		if (doit)
 		{
