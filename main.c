@@ -1683,7 +1683,6 @@ int translate_properties (char * argv[], SETTINGS *settings)
 		break;
 		default:
 			fprintf(stderr, "%s: unknown input file type\n", argv[0]);
-			fclose(fp);
 			return(1);
 		break;
 	}
