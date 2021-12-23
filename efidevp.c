@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <CoreFoundation/CoreFoundation.h>
 #include <IOKit/IOKitLib.h>
 
@@ -264,9 +265,9 @@ void GetPaths(io_service_t device, char *ioregPath, char **efiPath, SETTINGS *se
 				uint32_t size;
 				uid[0] = '\0';
 				pnp[0] = '\0';
-				size = sizeof(uid); IORegistryEntryGetProperty(device, "_UID", uid, &size);
-				size = sizeof(pnp); if (IORegistryEntryGetProperty(device, "compatible", pnp, &size)) {
-					size = sizeof(pnp); IORegistryEntryGetProperty(device, "name", pnp, &size);
+				size = (uint32_t)sizeof(uid); IORegistryEntryGetProperty(device, "_UID", uid, &size);
+				size = (uint32_t)sizeof(pnp); if (IORegistryEntryGetProperty(device, "compatible", pnp, &size)) {
+					size = (uint32_t)sizeof(pnp); IORegistryEntryGetProperty(device, "name", pnp, &size);
 				}
 				AsciiStrToUnicodeStrS(pnp, pnp16, ARRAY_SIZE(pnp16));
 				ACPI_HID_DEVICE_PATH *Acpi = (ACPI_HID_DEVICE_PATH *) CreateDeviceNode (ACPI_DEVICE_PATH, ACPI_DP, sizeof(ACPI_HID_DEVICE_PATH));
@@ -328,7 +329,7 @@ void OutputOneDevice(io_service_t device, SETTINGS *settings)
 		{
 			doit = false;
 			io_string_t name;
-			unsigned int size = 0;
+			uint32_t size = 0;
 			io_struct_inband_t prop_name;
 			io_struct_inband_t prop_ioname;
 			kern_return_t status;
@@ -336,10 +337,10 @@ void OutputOneDevice(io_service_t device, SETTINGS *settings)
 			status = IORegistryEntryGetNameInPlane(device, settings->plane, name);
 			assertion(status == KERN_SUCCESS, "can't obtain registry entry name");
 			
-			size = sizeof(prop_name);
+			size = (uint32_t)sizeof(prop_name);
 			IORegistryEntryGetProperty(device, "name", prop_name, &size);
 
-			size = sizeof(prop_ioname);
+			size = (uint32_t)sizeof(prop_ioname);
 			IORegistryEntryGetProperty(device, "IOName", prop_ioname, &size);
 					
 			if (!strcasecmp(prop_name, settings->search) || !strcasecmp(prop_ioname, settings->search) || !strcasecmp(name, settings->search))
@@ -356,7 +357,7 @@ void OutputOneDevice(io_service_t device, SETTINGS *settings)
 		{
 			ioregPath[0] = '\0';
 
-			size = sizeof(temp);
+			size = (uint32_t)sizeof(temp);
 			kr = IORegistryEntryGetProperty(device, "pcidebug", temp, &size);
 			if (kr == KERN_SUCCESS)
 			{
@@ -367,11 +368,11 @@ void OutputOneDevice(io_service_t device, SETTINGS *settings)
 				printf("        ");
 			}
 
-			size = sizeof(vendor_id);
+			size = (uint32_t)sizeof(vendor_id);
 			kr = IORegistryEntryGetProperty(device, "vendor-id", (char*)&vendor_id, &size);
 			if (kr == KERN_SUCCESS)
 			{
-				size = sizeof(device_id);
+				size = (uint32_t)sizeof(device_id);
 				kr = IORegistryEntryGetProperty(device, "device-id", (char*)&device_id, &size);
 			}
 			if (kr == KERN_SUCCESS)
