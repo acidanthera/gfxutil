@@ -1,5 +1,9 @@
 gfxutil changelog
 =================
+#### 1.82b
+- Fixed handling of Mac EFI malformed paths, thx @joevt
+- Added Apple Silicon support
+
 #### 1.81b
 - Improved compatibility with older EFI device paths having invalid trailing node (0xFF)
 
