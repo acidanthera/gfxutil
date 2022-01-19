@@ -1,5 +1,8 @@
 gfxutil changelog
 =================
+#### 1.83b
+- Fixed version in asset names
+
 #### 1.82b
 - Fixed handling of Mac EFI malformed paths, thx @joevt
 - Added Apple Silicon support
