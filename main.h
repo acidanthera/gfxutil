@@ -14,7 +14,7 @@
 
 // Constants
 #define MAX_FILENAME 255
-#define VERSION "1.83b"
+#define VERSION "1.84b"
 
 typedef enum FILE_TYPES
 {
