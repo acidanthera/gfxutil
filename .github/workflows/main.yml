@@ -17,10 +17,10 @@ jobs:
     env:
       JOB_TYPE: BUILD
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           path: gfxutil
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           repository: acidanthera/audk
           path: edk2
@@ -52,10 +52,10 @@ jobs:
 #     env:
 #       JOB_TYPE: ANALYZE
 #     steps:
-#       - uses: actions/checkout@v2
+#       - uses: actions/checkout@v3
 #         with:
 #           path: gfxutil
-#       - uses: actions/checkout@v2
+#       - uses: actions/checkout@v3
 #         with:
 #           repository: acidanthera/audk
 #           path: edk2
@@ -73,10 +73,10 @@ jobs:
 #       JOB_TYPE: COVERITY
 #     if: github.repository_owner == 'acidanthera' && github.event_name != 'pull_request'
 #     steps:
-#       - uses: actions/checkout@v2
+#       - uses: actions/checkout@v3
 #         with:
 #           path: gfxutil
-#       - uses: actions/checkout@v2
+#       - uses: actions/checkout@v3
 #         with:
 #           repository: acidanthera/audk
 #           path: edk2
