@@ -32,7 +32,7 @@ jobs:
       - run: cd gfxutil; xcodebuild -project gfxutil.xcodeproj -jobs 1 -configuration Release
 
       - name: Upload to Artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: Artifacts
           path: gfxutil/build/*/*.zip
