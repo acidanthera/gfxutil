@@ -40,35 +40,6 @@ EFI_GUID gEfiVTUTF8Guid = EFI_VT_UTF8_GUID;
 
 EFI_GUID gEfiDevicePathProtocolGuid = EFI_DEVICE_PATH_PROTOCOL_GUID;
 
-
-VOID *
-InternalAllocateCopyPool (
-	UINTN AllocationSize,
-	CONST VOID *Buffer
-	)
-{
-	VOID  *Memory;
-
-	ASSERT (Buffer != NULL);
-
-	Memory = malloc (AllocationSize);
-	if (Memory != NULL) {
-		Memory = memcpy (Memory, Buffer, AllocationSize);
-	}
-	return Memory;
-}
-
-
-VOID *
-AllocateCopyPool (
-	UINTN AllocationSize,
-	CONST VOID *Buffer
-	)
-{
-	return InternalAllocateCopyPool (AllocationSize, Buffer);
-}
-
-
 EFI_STATUS
 EFIAPI
 DontHandleProtocol (
@@ -511,7 +482,7 @@ void VerifyDevicePathNodeSizes(VOID * DevicePath) {
 
 EFI_STATUS
 EFIAPI
-UefiBootServicesTableLibConstructor ()
+UefiBootServicesTableLibConstructor (void)
 {
 	ZeroMem(&BS, sizeof(&BS));
 	BS.HandleProtocol = &DontHandleProtocol;

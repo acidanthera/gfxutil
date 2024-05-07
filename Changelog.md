@@ -1,5 +1,8 @@
 gfxutil changelog
 =================
+#### 1.84b
+- Switched to audk-stable-202305 for base EDK II version
+
 #### 1.83b
 - Fixed version in asset names
 

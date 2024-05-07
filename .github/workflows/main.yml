@@ -17,12 +17,13 @@ jobs:
     env:
       JOB_TYPE: BUILD
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           path: gfxutil
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           repository: acidanthera/audk
+          ref: audk-stable-202305
           path: edk2
       - name: CI Bootstrap
         run: |

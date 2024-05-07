@@ -21,7 +21,7 @@
 		6374FFED266ACF1800ABDA7F /* MemLibGeneric.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5B223A56E5400AE5FF7 /* MemLibGeneric.c */; };
 		6374FFEE266ACF1800ABDA7F /* RShiftU64.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5AF23A56E5400AE5FF7 /* RShiftU64.c */; };
 		6374FFEF266ACF1800ABDA7F /* MultU64x32.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5A423A56E5400AE5FF7 /* MultU64x32.c */; };
-		6374FFF0266ACF1800ABDA7F /* DevicePathUtilitiesStandaloneMm.c in Sources */ = {isa = PBXBuildFile; fileRef = 639FC4072664B551006E6C44 /* DevicePathUtilitiesStandaloneMm.c */; };
+		6374FFF0266ACF1800ABDA7F /* DevicePathUtilitiesBase.c in Sources */ = {isa = PBXBuildFile; fileRef = 639FC4072664B551006E6C44 /* DevicePathUtilitiesBase.c */; };
 		6374FFF1266ACF1800ABDA7F /* MemLibGuid.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5AA23A56E5400AE5FF7 /* MemLibGuid.c */; };
 		6374FFF2266ACF1800ABDA7F /* SafeString.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5A723A56E5400AE5FF7 /* SafeString.c */; };
 		6374FFF3266ACF1800ABDA7F /* CopyMemWrapper.c in Sources */ = {isa = PBXBuildFile; fileRef = 6377A5AE23A56E5400AE5FF7 /* CopyMemWrapper.c */; };
@@ -42,6 +42,10 @@
 		8DD76F770486A8DE00D96B5E /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 08FB7796FE84155DC02AAC07 /* main.c */; settings = {ATTRIBUTES = (); }; };
 		8DD76F7C0486A8DE00D96B5E /* gfxutil.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = C6859E970290921104C91782 /* gfxutil.1 */; };
 		9813AB380D12A271001DF28C /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 9813AB360D12A271001DF28C /* utils.c */; };
+		CE72D6952BEA58E0000F48A9 /* CommonMemoryAllocationLib.c in Sources */ = {isa = PBXBuildFile; fileRef = CE72D6922BEA58E0000F48A9 /* CommonMemoryAllocationLib.c */; };
+		CE72D6962BEA58E0000F48A9 /* CommonMemoryAllocationLibEx.c in Sources */ = {isa = PBXBuildFile; fileRef = CE72D6932BEA58E0000F48A9 /* CommonMemoryAllocationLibEx.c */; };
+		CE72D6972BEA58E0000F48A9 /* AlignedPages.c in Sources */ = {isa = PBXBuildFile; fileRef = CE72D6942BEA58E0000F48A9 /* AlignedPages.c */; };
+		CE72D6992BEA5902000F48A9 /* BaseMemoryProfileLibNull.c in Sources */ = {isa = PBXBuildFile; fileRef = CE72D6982BEA5902000F48A9 /* BaseMemoryProfileLibNull.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXBuildRule section */
@@ -105,7 +109,7 @@
 		6377A5BD23A56E5500AE5FF7 /* PrintLibInternal.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = PrintLibInternal.c; path = ../edk2/MdePkg/Library/BasePrintLib/PrintLibInternal.c; sourceTree = "<group>"; };
 		6377A5DA23A572B000AE5FF7 /* edk2misc.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = edk2misc.c; sourceTree = "<group>"; };
 		6377A5DC23A5C97100AE5FF7 /* edk2misc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = edk2misc.h; sourceTree = "<group>"; };
-		639FC4072664B551006E6C44 /* DevicePathUtilitiesStandaloneMm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = DevicePathUtilitiesStandaloneMm.c; path = ../edk2/MdePkg/Library/UefiDevicePathLib/DevicePathUtilitiesStandaloneMm.c; sourceTree = "<group>"; };
+		639FC4072664B551006E6C44 /* DevicePathUtilitiesBase.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = DevicePathUtilitiesBase.c; path = ../edk2/MdePkg/Library/UefiDevicePathLib/DevicePathUtilitiesBase.c; sourceTree = "<group>"; };
 		63C2792A23B32CAA008C348C /* efidevp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = efidevp.h; sourceTree = "<group>"; };
 		63C2792B23B32CAA008C348C /* efidevp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = efidevp.c; sourceTree = "<group>"; };
 		63C2792D23B33648008C348C /* DevicePath.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = DevicePath.h; path = ../edk2/MdePkg/Include/Protocol/DevicePath.h; sourceTree = "<group>"; };
@@ -116,6 +120,10 @@
 		98CAD3FE0D3381B500808BB2 /* main.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = main.h; sourceTree = "<group>"; };
 		C6859E970290921104C91782 /* gfxutil.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = gfxutil.1; sourceTree = "<group>"; };
 		CE147CCF2185E87400536AE6 /* Changelog.md */ = {isa = PBXFileReference; lastKnownFileType = text; path = Changelog.md; sourceTree = "<group>"; };
+		CE72D6922BEA58E0000F48A9 /* CommonMemoryAllocationLib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = CommonMemoryAllocationLib.c; path = ../edk2/MdeModulePkg/Library/CommonMemoryAllocationLib/CommonMemoryAllocationLib.c; sourceTree = "<group>"; };
+		CE72D6932BEA58E0000F48A9 /* CommonMemoryAllocationLibEx.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = CommonMemoryAllocationLibEx.c; path = ../edk2/MdeModulePkg/Library/CommonMemoryAllocationLib/CommonMemoryAllocationLibEx.c; sourceTree = "<group>"; };
+		CE72D6942BEA58E0000F48A9 /* AlignedPages.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = AlignedPages.c; path = ../edk2/MdeModulePkg/Library/CommonMemoryAllocationLib/AlignedPages.c; sourceTree = "<group>"; };
+		CE72D6982BEA5902000F48A9 /* BaseMemoryProfileLibNull.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = BaseMemoryProfileLibNull.c; path = ../edk2/MdeModulePkg/Library/BaseMemoryProfileLibNull/BaseMemoryProfileLibNull.c; sourceTree = "<group>"; };
 		CEC0494720FEA1B300FBCAC9 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = text; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -171,6 +179,10 @@
 		6377A5D923A56EDA00AE5FF7 /* edk */ = {
 			isa = PBXGroup;
 			children = (
+				CE72D6942BEA58E0000F48A9 /* AlignedPages.c */,
+				CE72D6922BEA58E0000F48A9 /* CommonMemoryAllocationLib.c */,
+				CE72D6932BEA58E0000F48A9 /* CommonMemoryAllocationLibEx.c */,
+				CE72D6982BEA5902000F48A9 /* BaseMemoryProfileLibNull.c */,
 				6377A5AC23A56E5400AE5FF7 /* BitField.c */,
 				6377A5A823A56E5400AE5FF7 /* CopyMem.c */,
 				6377A5AE23A56E5400AE5FF7 /* CopyMemWrapper.c */,
@@ -179,7 +191,7 @@
 				6377A5B523A56E5500AE5FF7 /* DevicePathFromText.c */,
 				6377A5B323A56E5500AE5FF7 /* DevicePathToText.c */,
 				6377A5B623A56E5500AE5FF7 /* DevicePathUtilities.c */,
-				639FC4072664B551006E6C44 /* DevicePathUtilitiesStandaloneMm.c */,
+				639FC4072664B551006E6C44 /* DevicePathUtilitiesBase.c */,
 				6377A5B123A56E5400AE5FF7 /* DivU64x32.c */,
 				6377A5A323A56E5300AE5FF7 /* DivU64x32Remainder.c */,
 				6377A5B723A56E5500AE5FF7 /* LShiftU64.c */,
@@ -303,12 +315,15 @@
 				6374FFF5266ACF1800ABDA7F /* SetMem.c in Sources */,
 				6374FFE7266ACF1800ABDA7F /* SwapBytes64.c in Sources */,
 				6374FFF8266ACF1800ABDA7F /* SwapBytes32.c in Sources */,
+				CE72D6952BEA58E0000F48A9 /* CommonMemoryAllocationLib.c in Sources */,
+				CE72D6962BEA58E0000F48A9 /* CommonMemoryAllocationLibEx.c in Sources */,
 				6374FFFE266ACF1800ABDA7F /* LShiftU64.c in Sources */,
 				6374FFEC266ACF1800ABDA7F /* PrintLib.c in Sources */,
 				63740002266ACF1800ABDA7F /* SwapBytes16.c in Sources */,
+				CE72D6992BEA5902000F48A9 /* BaseMemoryProfileLibNull.c in Sources */,
 				6374FFF2266ACF1800ABDA7F /* SafeString.c in Sources */,
 				6374FFEB266ACF1800ABDA7F /* Math64.c in Sources */,
-				6374FFF0266ACF1800ABDA7F /* DevicePathUtilitiesStandaloneMm.c in Sources */,
+				6374FFF0266ACF1800ABDA7F /* DevicePathUtilitiesBase.c in Sources */,
 				6374FFFA266ACF1800ABDA7F /* UefiDevicePathLib.c in Sources */,
 				6374FFEF266ACF1800ABDA7F /* MultU64x32.c in Sources */,
 				6374FFE9266ACF1800ABDA7F /* DevicePathFromText.c in Sources */,
@@ -320,6 +335,7 @@
 				6374FFED266ACF1800ABDA7F /* MemLibGeneric.c in Sources */,
 				6374FFF6266ACF1800ABDA7F /* Unaligned.c in Sources */,
 				63740001266ACF1800ABDA7F /* PrintLibInternal.c in Sources */,
+				CE72D6972BEA58E0000F48A9 /* AlignedPages.c in Sources */,
 				6374FFFF266ACF1800ABDA7F /* String.c in Sources */,
 				6374FFFB266ACF1800ABDA7F /* CopyMem.c in Sources */,
 				6374FFE8266ACF1800ABDA7F /* ZeroMemWrapper.c in Sources */,
@@ -352,6 +368,8 @@
 					../edk2/MdePkg/Library/UefiMemoryLib,
 					../edk2/MdePkg/Library/BaseLib,
 					../edk2/MdePkg/Library/BasePrintLib,
+					../edk2/MdeModulePkg/Include,
+					../edk2/MdeModulePkg/Library,
 					.,
 				);
 				INSTALL_PATH = /usr/local/bin;
@@ -365,7 +383,7 @@
 				);
 				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = gfxutil;
-				USER_HEADER_SEARCH_PATHS = "../edk2/MdePkg/Include ../edk2/MdePkg/Library/UefiDevicePathLib ../edk2/MdePkg/Library/UefiMemoryLib ../edk2/MdePkg/Library/BaseLib ../edk2/MdePkg/Library/BasePrintLib";
+				USER_HEADER_SEARCH_PATHS = "../edk2/MdePkg/Include ../edk2/MdePkg/Library/UefiDevicePathLib ../edk2/MdePkg/Library/UefiMemoryLib ../edk2/MdePkg/Library/BaseLib ../edk2/MdePkg/Library/BasePrintLib ../edk2/MdeModulePkg/Include ../edk2/MdeModulePkg/Library";
 			};
 			name = Debug;
 		};
@@ -386,6 +404,8 @@
 					../edk2/MdePkg/Library/UefiMemoryLib,
 					../edk2/MdePkg/Library/BaseLib,
 					../edk2/MdePkg/Library/BasePrintLib,
+					../edk2/MdeModulePkg/Include,
+					../edk2/MdeModulePkg/Library,
 					.,
 				);
 				INSTALL_PATH = /usr/local/bin;
@@ -399,7 +419,7 @@
 				);
 				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = gfxutil;
-				USER_HEADER_SEARCH_PATHS = "../edk2/MdePkg/Include ../edk2/MdePkg/Library/UefiDevicePathLib ../edk2/MdePkg/Library/UefiMemoryLib ../edk2/MdePkg/Library/BaseLib ../edk2/MdePkg/Library/BasePrintLib";
+				USER_HEADER_SEARCH_PATHS = "../edk2/MdePkg/Include ../edk2/MdePkg/Library/UefiDevicePathLib ../edk2/MdePkg/Library/UefiMemoryLib ../edk2/MdePkg/Library/BaseLib ../edk2/MdePkg/Library/BasePrintLib ../edk2/MdeModulePkg/Include ../edk2/MdeModulePkg/Library";
 			};
 			name = Release;
 		};
